@@ -1,399 +1,471 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <title>多功能工具页面</title>
-    <style>
-      /* 默认样式（浅色模式的备选） */
+
+<head>
+  <meta charset="UTF-8" />
+  <title>多功能工具页面</title>
+  <style>
+    /* 默认样式（浅色模式的备选） */
+    body {
+      background-color: #ffffff;
+      /* 浅色背景 */
+      color: #000000;
+      /* 深色文字 */
+      transition: background-color 0.5s, color 0.5s;
+      /* 平滑过渡效果 */
+    }
+
+    /* 工具框样式 */
+    .tool-container {
+      background-color: #f8f9fa;
+      /* 浅色模式工具框背景 */
+      padding: 20px;
+      border-radius: 8px;
+      transition: background-color 0.5s, color 0.5s;
+    }
+
+    /* 按钮样式 */
+    button {
+      background-color: #007bff;
+      /* 浅色模式按钮背景 */
+      color: #ffffff;
+      /* 浅色模式按钮文字 */
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* 深色模式 */
+    @media (prefers-color-scheme: dark) {
       body {
-        background-color: #ffffff; /* 浅色背景 */
-        color: #000000; /* 深色文字 */
-        transition: background-color 0.5s, color 0.5s; /* 平滑过渡效果 */
+        background-color: #1e1e1e;
+        /* 深色背景 */
+        color: #e0e0e0;
+        /* 浅色文字 */
       }
 
-      /* 工具框样式 */
       .tool-container {
-        background-color: #f8f9fa; /* 浅色模式工具框背景 */
-        padding: 20px;
-        border-radius: 8px;
-        transition: background-color 0.5s, color 0.5s;
+        background-color: #1e1e1e;
+        /* 深色模式工具框背景 */
+        color: #e0e0e0;
+        /* 浅色文字 */
       }
 
-      /* 按钮样式 */
-      button {
-        background-color: #007bff; /* 浅色模式按钮背景 */
-        color: #ffffff; /* 浅色模式按钮文字 */
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s, color 0.3s;
-      }
-
-      /* 深色模式 */
-      @media (prefers-color-scheme: dark) {
-        body {
-          background-color: #1e1e1e; /* 深色背景 */
-          color: #e0e0e0; /* 浅色文字 */
-        }
-
-        .tool-container {
-          background-color: #1e1e1e; /* 深色模式工具框背景 */
-          color: #e0e0e0; /* 浅色文字 */
-        }
-
-        .tool {
-          border: 1px solid #3c3c3c;
-          box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
-        }
-
-        textarea {
-          background-color: #3c3c3c; /* 深色背景 */
-          color: #e0e0e0; /* 浅色文字 */
-          border: 1px solid #3c3c3c; /* 深色边框 */
-        }
-
-        .notification {
-          background-color: rgba(0, 123, 255, 0.8); /* 蓝色提示框，80% 不透明 */
-        }
-
-        .sidebar {
-          background-color: #252526;
-          color: white;
-        }
-
-        .sidebar button {
-          color: white;
-          border: 1px solid #3c3c3c;
-        }
-
-        .sidebar button:hover {
-          background-color: #34495e;
-        }
-
-        .sidebar h2 {
-          border-bottom: 1px solid #3c3c3c;
-        }
-      }
-
-      /* 浅色模式 */
-      @media (prefers-color-scheme: light) {
-        body {
-          background-color: #f8f9fa; /* 浅色背景 */
-          color: #000000; /* 深色文字 */
-        }
-        .tool-container {
-          background-color: #f8f9fa; /* 浅色模式工具框背景 */
-          color: #000000; /* 深色文字 */
-        }
-        .tool {
-          border: 1px solid #ccc;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        textarea {
-          background-color: #ffffff; /* 浅色背景 */
-          color: #000000; /* 深色文字 */
-          border: 1px solid #ccc; /* 浅色边框 */
-        }
-        .notification {
-          background-color: rgba(40, 167, 69, 0.8); /* 绿色提示框，80% 不透明 */
-        }
-        .sidebar {
-          background-color: #ebebeb;
-          color: black;
-        }
-        .sidebar button {
-          color: black;
-          border: 1px solid #ccc;
-        }
-        .sidebar button:hover {
-          background-color: #e5e1df;
-        }
-        .sidebar h2 {
-          border-bottom: 1px solid #ccc;
-        }
-      }
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        display: flex;
-        height: 100vh;
-        overflow: hidden;
-      }
-      .sidebar {
-        width: 200px;
-        display: flex;
-        flex-direction: column;
-      }
-      .sidebar h2 {
-        margin: 0;
-        padding: 20px;
-        text-align: center;
-      }
-      .sidebar button {
-        padding: 15px 20px;
-        background: none;
-        border: none;
-        text-align: left;
-        cursor: pointer;
-        transition: background 0.2s;
-      }
-      .content {
-        flex: 1;
-        padding: 20px;
-        overflow-y: auto;
-      }
-      .tool-container {
-        display: none; /* 默认隐藏所有工具 */
-      }
-      .tool-container.active {
-        display: block; /* 显示当前激活的工具 */
-      }
       .tool {
-        width: 90%;
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
+        border: 1px solid #3c3c3c;
+        box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
       }
+
       textarea {
-        width: calc(100% - 20px); /* 留出内边距 */
-        height: 150px;
-        margin-bottom: 10px;
-        padding: 10px;
-        font-size: 14px;
-        border-radius: 5px;
-        resize: none;
+        background-color: #3c3c3c;
+        /* 深色背景 */
+        color: #e0e0e0;
+        /* 浅色文字 */
+        border: 1px solid #3c3c3c;
+        /* 深色边框 */
       }
-      button {
-        padding: 10px 20px;
-        margin-right: 10px;
-        font-size: 14px;
-        cursor: pointer;
-        border: none;
-        background-color: #007bff;
-        color: white;
-        border-radius: 5px;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      .output-container {
-        position: relative;
-        margin-top: 10px;
-      }
-      .copy-button {
-        position: absolute;
-        right: 10px;
-        top: 10px;
-        padding: 5px 10px;
-        font-size: 12px;
-        cursor: pointer;
-        border: none;
-        background-color: #28a745;
-        color: white;
-        border-radius: 5px;
-        opacity: 0;
-        transition: opacity 0.2s;
-      }
-      .output-container:hover .copy-button {
-        opacity: 1;
-      }
-      .copy-button:hover {
-        background-color: rgba(40, 167, 69, 0.8); /* 绿色背景，80% 不透明度 */
-      }
+
       .notification {
-        position: fixed;
-        top: 10px;
-        right: 20px;
-        padding: 10px 20px;
-        background-color: rgba(40, 167, 69, 0.8); /* 绿色背景，80% 不透明度 */
+        background-color: rgba(0, 123, 255, 0.8);
+        /* 蓝色提示框，80% 不透明 */
+      }
+
+      .sidebar {
+        background-color: #252526;
         color: white;
-        border-radius: 5px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-        z-index: 1000;
       }
-      .notification.show {
-        display: block;
-        opacity: 1;
+
+      .sidebar button {
+        color: white;
+        border: 1px solid #3c3c3c;
       }
-    </style>
-  </head>
-  <body>
-    <div class="sidebar">
-      <h2>工具菜单</h2>
-      <button onclick="showTool('newlineTool')">换行符文本转换</button>
-      <button onclick="showTool('jsonTool')">JSON 格式化与压缩</button>
-      <button onclick="showTool('base64Tool')">Base64 编码解码</button>
+
+      .sidebar button:hover {
+        background-color: #34495e;
+      }
+
+      .sidebar h2 {
+        border-bottom: 1px solid #3c3c3c;
+      }
+    }
+
+    /* 浅色模式 */
+    @media (prefers-color-scheme: light) {
+      body {
+        background-color: #f8f9fa;
+        /* 浅色背景 */
+        color: #000000;
+        /* 深色文字 */
+      }
+
+      .tool-container {
+        background-color: #f8f9fa;
+        /* 浅色模式工具框背景 */
+        color: #000000;
+        /* 深色文字 */
+      }
+
+      .tool {
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      textarea {
+        background-color: #ffffff;
+        /* 浅色背景 */
+        color: #000000;
+        /* 深色文字 */
+        border: 1px solid #ccc;
+        /* 浅色边框 */
+      }
+
+      .notification {
+        background-color: rgba(40, 167, 69, 0.8);
+        /* 绿色提示框，80% 不透明 */
+      }
+
+      .sidebar {
+        background-color: #ebebeb;
+        color: black;
+      }
+
+      .sidebar button {
+        color: black;
+        border: 1px solid #ccc;
+      }
+
+      .sidebar button:hover {
+        background-color: #e5e1df;
+      }
+
+      .sidebar h2 {
+        border-bottom: 1px solid #ccc;
+      }
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar h2 {
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .sidebar button {
+      padding: 15px 20px;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .tool-container {
+      display: none;
+      /* 默认隐藏所有工具 */
+    }
+
+    .tool-container.active {
+      display: block;
+      /* 显示当前激活的工具 */
+    }
+
+    .tool {
+      width: 90%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    textarea {
+      width: calc(100% - 20px);
+      /* 留出内边距 */
+      height: 150px;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      resize: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-right: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .output-container {
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .copy-button {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      border: none;
+      background-color: #28a745;
+      color: white;
+      border-radius: 5px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .output-container:hover .copy-button {
+      opacity: 1;
+    }
+
+    .copy-button:hover {
+      background-color: rgba(40, 167, 69, 0.8);
+      /* 绿色背景，80% 不透明度 */
+    }
+
+    .notification {
+      position: fixed;
+      top: 10px;
+      right: 20px;
+      padding: 10px 20px;
+      background-color: rgba(40, 167, 69, 0.8);
+      /* 绿色背景，80% 不透明度 */
+      color: white;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      z-index: 1000;
+    }
+
+    .notification.show {
+      display: block;
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sidebar">
+    <h2>工具菜单</h2>
+    <button onclick="showTool('newlineTool')">换行符文本转换</button>
+    <button onclick="showTool('jsonTool')">JSON 格式化与压缩</button>
+    <button onclick="showTool('base64Tool')">Base64 编码解码</button>
+    <button onclick="showTool('urlTool')">URL 编码解码</button>
+  </div>
+  <div class="content">
+    <!-- 换行符文本转换工具 -->
+    <div id="newlineTool" class="tool-container active">
+      <!-- 默认显示此工具 -->
+      <div class="tool">
+        <h2>换行符文本转换</h2>
+        <textarea id="inputText" placeholder="输入文本..."></textarea>
+        <br />
+        <button onclick="convertToNewlines()">转成多行</button>
+        <button onclick="convertToSymbols()">转成单行</button>
+        <div class="output-container">
+          <textarea id="outputText" placeholder="输出结果..." readonly></textarea>
+          <button class="copy-button" onclick="copyToClipboard('outputText')">
+            复制
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="content">
-      <!-- 换行符文本转换工具 -->
-      <div id="newlineTool" class="tool-container active">
-        <!-- 默认显示此工具 -->
-        <div class="tool">
-          <h2>换行符文本转换</h2>
-          <textarea id="inputText" placeholder="输入文本..."></textarea>
-          <br />
-          <button onclick="convertToNewlines()">转成多行</button>
-          <button onclick="convertToSymbols()">转成单行</button>
-          <div class="output-container">
-            <textarea
-              id="outputText"
-              placeholder="输出结果..."
-              readonly
-            ></textarea>
-            <button class="copy-button" onclick="copyToClipboard('outputText')">
-              复制
-            </button>
-          </div>
-        </div>
-      </div>
 
-      <!-- JSON 格式化与压缩工具 -->
-      <div id="jsonTool" class="tool-container">
-        <div class="tool">
-          <h2>JSON 格式化与压缩</h2>
-          <textarea id="inputJson" placeholder="输入 JSON..."></textarea>
-          <br />
-          <button onclick="formatJson()">JSON 格式化</button>
-          <button onclick="compressJson()">JSON 压缩</button>
-          <div class="output-container">
-            <textarea
-              id="outputJson"
-              placeholder="输出结果..."
-              readonly
-            ></textarea>
-            <button class="copy-button" onclick="copyToClipboard('outputJson')">
-              复制
-            </button>
-          </div>
+    <!-- JSON 格式化与压缩工具 -->
+    <div id="jsonTool" class="tool-container">
+      <div class="tool">
+        <h2>JSON 格式化与压缩</h2>
+        <textarea id="inputJson" placeholder="输入 JSON..."></textarea>
+        <br />
+        <button onclick="formatJson()">JSON 格式化</button>
+        <button onclick="compressJson()">JSON 压缩</button>
+        <div class="output-container">
+          <textarea id="outputJson" placeholder="输出结果..." readonly></textarea>
+          <button class="copy-button" onclick="copyToClipboard('outputJson')">
+            复制
+          </button>
         </div>
-      </div>
-
-      <!-- 在工具内容区添加 Base64 编码解码工具 -->
-      <div id="base64Tool" class="tool-container">
-        <div class="tool">
-          <h2>Base64 编码解码工具</h2>
-          <textarea
-            id="inputBase64"
-            placeholder="输入文本或 Base64 编码..."
-          ></textarea>
-          <br />
-          <button onclick="encodeBase64()">Base64 编码</button>
-          <button onclick="decodeBase64()">Base64 解码</button>
-          <div class="output-container">
-            <textarea
-              id="outputBase64"
-              placeholder="输出结果..."
-              readonly
-            ></textarea>
-            <button
-              class="copy-button"
-              onclick="copyToClipboard('outputBase64')"
-            >
-              复制
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 添加复制成功的提示框 -->
-      <div id="copyNotification" class="notification" style="display: none">
-        复制成功！
       </div>
     </div>
 
-    <script>
-      // 默认显示第一个工具
-      document.getElementById("newlineTool").classList.add("active");
+    <!-- 在工具内容区添加 Base64 编码解码工具 -->
+    <div id="base64Tool" class="tool-container">
+      <div class="tool">
+        <h2>Base64 编码解码工具</h2>
+        <textarea id="inputBase64" placeholder="输入文本或 Base64 编码..."></textarea>
+        <br />
+        <button onclick="encodeBase64()">Base64 编码</button>
+        <button onclick="decodeBase64()">Base64 解码</button>
+        <div class="output-container">
+          <textarea id="outputBase64" placeholder="输出结果..." readonly></textarea>
+          <button class="copy-button" onclick="copyToClipboard('outputBase64')">
+            复制
+          </button>
+        </div>
+      </div>
+    </div>
 
-      function showTool(toolId) {
-        // 隐藏所有工具
-        const tools = document.querySelectorAll(".tool-container");
-        tools.forEach((tool) => tool.classList.remove("active"));
+    <!-- URL 编码解码工具 -->
+    <div id="urlTool" class="tool-container">
+      <div class="tool">
+        <h2>URL 编码解码工具</h2>
+        <textarea id="inputUrl" placeholder="输入URL或文本..."></textarea>
+        <button onclick="encodeUrl()">URL 编码</button>
+        <button onclick="decodeUrl()">URL 解码</button>
+        <div class="output-container">
+          <textarea id="outputUrl" placeholder="输出结果..." readonly></textarea>
+          <button class="copy-button" onclick="copyToClipboard('outputUrl')">复制</button>
+        </div>
+      </div>
+    </div>
 
-        // 显示选中的工具
-        document.getElementById(toolId).classList.add("active");
+    <!-- 添加复制成功的提示框 -->
+    <div id="copyNotification" class="notification" style="display: none">
+      复制成功！
+    </div>
+  </div>
+
+  <script>
+    // 默认显示第一个工具
+    document.getElementById("newlineTool").classList.add("active");
+
+    function showTool(toolId) {
+      // 隐藏所有工具
+      const tools = document.querySelectorAll(".tool-container");
+      tools.forEach((tool) => tool.classList.remove("active"));
+
+      // 显示选中的工具
+      document.getElementById(toolId).classList.add("active");
+    }
+
+    function convertToNewlines() {
+      const inputText = document.getElementById("inputText").value;
+      const convertedText = inputText.replace(/\\n/g, "\n");
+      document.getElementById("outputText").value = convertedText;
+    }
+
+    function convertToSymbols() {
+      const inputText = document.getElementById("inputText").value;
+      const convertedText = inputText.replace(/\n/g, "\\n");
+      document.getElementById("outputText").value = convertedText;
+    }
+
+    function formatJson() {
+      try {
+        const inputJson = document.getElementById("inputJson").value;
+        const parsedJson = JSON.parse(inputJson);
+        const formattedJson = JSON.stringify(parsedJson, null, 4);
+        document.getElementById("outputJson").value = formattedJson;
+      } catch (error) {
+        alert("无效的 JSON 输入，请检查格式！");
       }
+    }
 
-      function convertToNewlines() {
-        const inputText = document.getElementById("inputText").value;
-        const convertedText = inputText.replace(/\\n/g, "\n");
-        document.getElementById("outputText").value = convertedText;
+    function compressJson() {
+      try {
+        const inputJson = document.getElementById("inputJson").value;
+        const parsedJson = JSON.parse(inputJson);
+        const compressedJson = JSON.stringify(parsedJson);
+        document.getElementById("outputJson").value = compressedJson;
+      } catch (error) {
+        alert("无效的 JSON 输入，请检查格式！");
       }
+    }
 
-      function convertToSymbols() {
-        const inputText = document.getElementById("inputText").value;
-        const convertedText = inputText.replace(/\n/g, "\\n");
-        document.getElementById("outputText").value = convertedText;
+    function copyToClipboard(elementId) {
+      const output = document.getElementById(elementId);
+      output.select();
+      output.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+
+      // 显示非阻塞的复制成功提示
+      showCopyNotification();
+    }
+
+    function showCopyNotification() {
+      const notification = document.getElementById("copyNotification");
+      notification.style.display = "block"; // 确保元素被显示
+      notification.classList.add("show");
+
+      // 2秒后隐藏提示
+      setTimeout(() => {
+        notification.classList.remove("show");
+        setTimeout(() => (notification.style.display = "none"), 500); // 0.5秒后隐藏元素
+      }, 2000);
+    }
+
+    function encodeBase64() {
+      try {
+        const input = document.getElementById("inputBase64").value;
+        const encoded = btoa(input); // 使用 btoa 进行 Base64 编码
+        document.getElementById("outputBase64").value = encoded;
+      } catch (error) {
+        alert("编码失败，请检查输入内容！");
       }
+    }
 
-      function formatJson() {
-        try {
-          const inputJson = document.getElementById("inputJson").value;
-          const parsedJson = JSON.parse(inputJson);
-          const formattedJson = JSON.stringify(parsedJson, null, 4);
-          document.getElementById("outputJson").value = formattedJson;
-        } catch (error) {
-          alert("无效的 JSON 输入，请检查格式！");
-        }
+    function decodeBase64() {
+      try {
+        const input = document.getElementById("inputBase64").value;
+        const decoded = atob(input); // 使用 atob 进行 Base64 解码
+        document.getElementById("outputBase64").value = decoded;
+      } catch (error) {
+        alert("解码失败，请确保输入的是有效的 Base64 编码！");
       }
+    }
 
-      function compressJson() {
-        try {
-          const inputJson = document.getElementById("inputJson").value;
-          const parsedJson = JSON.parse(inputJson);
-          const compressedJson = JSON.stringify(parsedJson);
-          document.getElementById("outputJson").value = compressedJson;
-        } catch (error) {
-          alert("无效的 JSON 输入，请检查格式！");
-        }
+    function encodeUrl() {
+      try {
+        const input = document.getElementById("inputUrl").value;
+        const encoded = encodeURIComponent(input);
+        document.getElementById("outputUrl").value = encoded;
+      } catch (error) {
+        alert("编码失败，请检查输入内容！");
       }
+    }
 
-      function copyToClipboard(elementId) {
-        const output = document.getElementById(elementId);
-        output.select();
-        output.setSelectionRange(0, 99999);
-        document.execCommand("copy");
-
-        // 显示非阻塞的复制成功提示
-        showCopyNotification();
+    function decodeUrl() {
+      try {
+        const input = document.getElementById("inputUrl").value;
+        const decoded = decodeURIComponent(input);
+        document.getElementById("outputUrl").value = decoded;
+      } catch (error) {
+        alert("解码失败，请确保输入的是有效的URL编码！");
       }
+    }
+  </script>
+</body>
 
-      function showCopyNotification() {
-        const notification = document.getElementById("copyNotification");
-        notification.style.display = "block"; // 确保元素被显示
-        notification.classList.add("show");
-
-        // 2秒后隐藏提示
-        setTimeout(() => {
-          notification.classList.remove("show");
-          setTimeout(() => (notification.style.display = "none"), 500); // 0.5秒后隐藏元素
-        }, 2000);
-      }
-
-      function encodeBase64() {
-        try {
-          const input = document.getElementById("inputBase64").value;
-          const encoded = btoa(input); // 使用 btoa 进行 Base64 编码
-          document.getElementById("outputBase64").value = encoded;
-        } catch (error) {
-          alert("编码失败，请检查输入内容！");
-        }
-      }
-
-      function decodeBase64() {
-        try {
-          const input = document.getElementById("inputBase64").value;
-          const decoded = atob(input); // 使用 atob 进行 Base64 解码
-          document.getElementById("outputBase64").value = decoded;
-        } catch (error) {
-          alert("解码失败，请确保输入的是有效的 Base64 编码！");
-        }
-      }
-    </script>
-  </body>
 </html>
