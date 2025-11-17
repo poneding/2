@@ -3,246 +3,579 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>多功能工具页面</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevTools - 在线开发工具箱</title>
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z' fill='%231f6feb'/%3E%3Cpath d='M14 2l-1 1 8 8 1-1-8-8zM6 14l-1 1 8 8 1-1-8-8z' fill='%231f6feb' opacity='0.7'/%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z' fill='%230969da'/%3E%3Cpath d='M14 2l-1 1 8 8 1-1-8-8zM6 14l-1 1 8 8 1-1-8-8z' fill='%230969da' opacity='0.7'/%3E%3C/svg%3E"
+    media="(prefers-color-scheme: light)" />
+  <!-- Monaco Editor CSS -->
+  <link rel="stylesheet" data-name="vs/editor/editor.main"
+    href="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/editor/editor.main.css">
   <style>
-    /* 默认样式（浅色模式的备选） */
-    body {
-      background-color: #ffffff;
-      /* 浅色背景 */
-      color: #000000;
-      /* 深色文字 */
-      transition: background-color 0.5s, color 0.5s;
-      /* 平滑过渡效果 */
+    * {
+      box-sizing: border-box;
     }
 
-    /* 工具框样式 */
-    .tool-container {
-      background-color: #f8f9fa;
-      /* 浅色模式工具框背景 */
-      padding: 20px;
-      border-radius: 8px;
-      transition: background-color 0.5s, color 0.5s;
+    :root {
+      --primary-color: #0969da;
+      --primary-hover: #0860ca;
+      --success-color: #1a7f37;
+      --border-color: #d1d9e0;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #ffffff;
+      --text-primary: #24292f;
+      --text-secondary: #656d76;
+      --text-tertiary: #6e7781;
+      --shadow: rgba(31, 35, 40, 0.04);
+      --sidebar-width: 180px;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 12px;
+      --spacing-lg: 16px;
+      --spacing-xl: 20px;
     }
 
-    /* 按钮样式 */
-    button {
-      background-color: #007bff;
-      /* 浅色模式按钮背景 */
-      color: #ffffff;
-      /* 浅色模式按钮文字 */
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    /* 深色模式 */
     @media (prefers-color-scheme: dark) {
-      body {
-        background-color: #1e1e1e;
-        /* 深色背景 */
-        color: #e0e0e0;
-        /* 浅色文字 */
-      }
-
-      .tool-container {
-        background-color: #1e1e1e;
-        /* 深色模式工具框背景 */
-        color: #e0e0e0;
-        /* 浅色文字 */
-      }
-
-      .tool {
-        border: 1px solid #3c3c3c;
-        box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
-      }
-
-      textarea {
-        background-color: #3c3c3c;
-        /* 深色背景 */
-        color: #e0e0e0;
-        /* 浅色文字 */
-        border: 1px solid #3c3c3c;
-        /* 深色边框 */
-      }
-
-      .notification {
-        background-color: rgba(0, 123, 255, 0.8);
-        /* 蓝色提示框，80% 不透明 */
-      }
-
-      .sidebar {
-        background-color: #252526;
-        color: white;
-      }
-
-      .sidebar button {
-        color: white;
-        border: 1px solid #3c3c3c;
-      }
-
-      .sidebar button:hover {
-        background-color: #34495e;
-      }
-
-      .sidebar h2 {
-        border-bottom: 1px solid #3c3c3c;
-      }
-    }
-
-    /* 浅色模式 */
-    @media (prefers-color-scheme: light) {
-      body {
-        background-color: #f8f9fa;
-        /* 浅色背景 */
-        color: #000000;
-        /* 深色文字 */
-      }
-
-      .tool-container {
-        background-color: #f8f9fa;
-        /* 浅色模式工具框背景 */
-        color: #000000;
-        /* 深色文字 */
-      }
-
-      .tool {
-        border: 1px solid #ccc;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      }
-
-      textarea {
-        background-color: #ffffff;
-        /* 浅色背景 */
-        color: #000000;
-        /* 深色文字 */
-        border: 1px solid #ccc;
-        /* 浅色边框 */
-      }
-
-      .notification {
-        background-color: rgba(40, 167, 69, 0.8);
-        /* 绿色提示框，80% 不透明 */
-      }
-
-      .sidebar {
-        background-color: #ebebeb;
-        color: black;
-      }
-
-      .sidebar button {
-        color: black;
-        border: 1px solid #ccc;
-      }
-
-      .sidebar button:hover {
-        background-color: #e5e1df;
-      }
-
-      .sidebar h2 {
-        border-bottom: 1px solid #ccc;
+      :root {
+        --primary-color: #1f6feb;
+        --primary-hover: #388bfd;
+        --success-color: #238636;
+        --border-color: #30363d;
+        --bg-primary: #0d1117;
+        --bg-secondary: #161b22;
+        --bg-tertiary: #21262d;
+        --text-primary: #e6edf3;
+        --text-secondary: #7d8590;
+        --text-tertiary: #656d76;
+        --shadow: rgba(0, 0, 0, 0.4);
       }
     }
 
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.5;
       display: flex;
       height: 100vh;
       overflow: hidden;
     }
 
     .sidebar {
-      width: 200px;
+      width: var(--sidebar-width);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
+      flex-shrink: 0;
     }
 
-    .sidebar h2 {
+    .sidebar-header {
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      height: 53px;
+      display: flex;
+      align-items: center;
+    }
+
+    .sidebar-header h2 {
       margin: 0;
-      padding: 20px;
-      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
     }
 
-    .sidebar button {
-      padding: 15px 20px;
+    .github-link {
+      position: fixed;
+      top: var(--spacing-md);
+      right: var(--spacing-md);
+      z-index: 1000;
+      border: none;
+      padding: var(--spacing-xs);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+      background: none;
+    }
+
+    .github-link:hover {
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    .github-link svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .logo {
+      flex-shrink: 0;
+      color: var(--primary-color);
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-header:hover .logo {
+      transform: rotate(90deg);
+      color: var(--primary-hover);
+    }
+
+    .sidebar-nav {
+      padding: var(--spacing-sm) 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-button {
+      width: 100%;
+      padding: var(--spacing-sm) var(--spacing-lg);
       background: none;
       border: none;
       text-align: left;
       cursor: pointer;
-      transition: background 0.2s;
+      font-size: 14px;
+      color: var(--text-primary);
+      transition: all 0.15s ease;
+      border-left: 3px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .nav-button:hover {
+      background: var(--bg-primary);
+    }
+
+    .nav-button.active {
+      background: var(--bg-primary);
+      border-left-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    .nav-button .tool-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+      filter: grayscale(0.8) opacity(0.7);
+    }
+
+    .nav-button:hover .tool-icon {
+      filter: grayscale(0.3) opacity(0.9);
+      transform: scale(1.05);
+    }
+
+    .nav-button.active .tool-icon {
+      filter: grayscale(0) opacity(1);
+      transform: scale(1.1);
     }
 
     .content {
       flex: 1;
-      padding: 20px;
-      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-header {
+      padding: var(--spacing-md) var(--spacing-xl);
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      height: 53px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .content-header h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .content-header p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.3;
     }
 
     .tool-container {
       display: none;
-      /* 默认隐藏所有工具 */
+      flex: 1;
+      padding: var(--spacing-md);
+      overflow-y: auto;
     }
 
     .tool-container.active {
-      display: block;
-      /* 显示当前激活的工具 */
+      display: flex;
     }
 
-    .tool {
-      width: 90%;
-      max-width: 600px;
+    /* 页面容器 */
+    .page-container {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+    }
+
+    .page-container.active {
+      display: flex;
+    }
+
+    /* 首页样式 */
+    .home-content {
+      padding: var(--spacing-xl);
+      overflow-y: auto;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 20px;
-      border-radius: 10px;
+      width: 100%;
+    }
+
+    .hero-section {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .hero-logo {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .hero-logo svg {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .hero-title {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 var(--spacing-md) 0;
+      letter-spacing: -1px;
+    }
+
+    .hero-subtitle {
+      font-size: 20px;
+      color: var(--primary-color);
+      margin: 0 0 var(--spacing-md) 0;
+      font-weight: 500;
+    }
+
+    .hero-description {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin: 0 auto;
+      max-width: 600px;
+      line-height: 1.6;
+    }
+
+    /* 工具网格 */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .tool-card {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: var(--spacing-xl);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px var(--shadow);
+      border-color: var(--primary-color);
+    }
+
+    .tool-card-icon {
+      width: 60px;
+      height: 60px;
+      margin-bottom: var(--spacing-md);
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tool-card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 var(--spacing-sm) 0;
+    }
+
+    .tool-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0 0 var(--spacing-lg) 0;
+      line-height: 1.5;
+    }
+
+    .tool-card-footer {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .tool-badge {
+      background: var(--primary-color);
+      color: white;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* 特性区域 */
+    .features-section {
       text-align: center;
     }
 
+    .features-section h2 {
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 var(--spacing-xl) 0;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-xl);
+    }
+
+    .feature-item {
+      text-align: center;
+    }
+
+    .feature-icon {
+      font-size: 48px;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .feature-item h4 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 var(--spacing-sm) 0;
+    }
+
+    .feature-item p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 36px;
+      }
+
+      .hero-subtitle {
+        font-size: 18px;
+      }
+
+      .tools-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-lg);
+      }
+
+      .home-content {
+        padding: var(--spacing-lg);
+      }
+    }
+
+    .tool {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-primary);
+      display: grid;
+      grid-template-rows: 1fr auto 1fr;
+      gap: var(--spacing-xs);
+    }
+
+    .input-group,
+    .output-group {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .input-group label,
+    .output-group label {
+      display: block;
+      margin-bottom: var(--spacing-xs);
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
     textarea {
-      width: calc(100% - 20px);
-      /* 留出内边距 */
-      height: 150px;
-      margin-bottom: 10px;
-      padding: 10px;
-      font-size: 14px;
-      border-radius: 5px;
+      width: 100%;
+      height: 100%;
+      padding: var(--spacing-md);
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
       resize: none;
+      transition: all 0.15s ease;
     }
 
-    button {
-      padding: 10px 20px;
-      margin-right: 10px;
-      font-size: 14px;
-      cursor: pointer;
-      border: none;
-      background-color: #007bff;
-      color: white;
-      border-radius: 5px;
-    }
-
-    button:hover {
-      background-color: #0056b3;
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      background: var(--bg-tertiary);
+      box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+      z-index: 1;
     }
 
     .output-container {
       position: relative;
-      margin-top: 10px;
+      height: 100%;
+    }
+
+    .output-textarea {
+      background: var(--bg-primary);
+      border-color: var(--border-color);
+    }
+
+    .output-textarea:focus {
+      background: var(--bg-tertiary);
+    }
+
+    .button-group {
+      display: flex;
+      gap: var(--spacing-xs);
+      padding: 0;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      padding: var(--spacing-xs);
+      align-self: center;
+    }
+
+    .btn {
+      padding: var(--spacing-xs) var(--spacing-md);
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .btn svg {
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+    }
+
+    .btn:hover svg {
+      transform: scale(1.1);
+    }
+
+    .btn-primary svg {
+      color: white;
+    }
+
+    .btn-secondary svg {
+      color: var(--text-secondary);
+    }
+
+    .btn-secondary:hover svg {
+      color: var(--text-primary);
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--border-color);
     }
 
     .copy-button {
       position: absolute;
-      right: 10px;
-      top: 10px;
-      padding: 5px 10px;
-      font-size: 12px;
-      cursor: pointer;
-      border: none;
-      background-color: #28a745;
+      right: var(--spacing-sm);
+      top: var(--spacing-sm);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      font-size: 11px;
+      background: var(--success-color);
       color: white;
-      border-radius: 5px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
       opacity: 0;
-      transition: opacity 0.2s;
+      transition: all 0.15s ease;
+      z-index: 10;
+      font-weight: 500;
     }
 
     .output-container:hover .copy-button {
@@ -250,222 +583,882 @@
     }
 
     .copy-button:hover {
-      background-color: rgba(40, 167, 69, 0.8);
-      /* 绿色背景，80% 不透明度 */
+      background: color-mix(in srgb, var(--success-color) 85%, black);
+      transform: translateY(-1px);
+    }
+
+    /* Diff工具特殊样式 */
+    .diff-tool {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .diff-container {
+      flex: 1;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--bg-tertiary);
+    }
+
+    .diff-editor {
+      width: 100%;
+      height: 100%;
     }
 
     .notification {
       position: fixed;
-      top: 10px;
-      right: 20px;
-      padding: 10px 20px;
-      background-color: rgba(40, 167, 69, 0.8);
-      /* 绿色背景，80% 不透明度 */
+      top: var(--spacing-lg);
+      right: var(--spacing-xl);
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: var(--success-color);
       color: white;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       opacity: 0;
-      transition: opacity 0.5s ease-in-out;
+      transform: translateY(-10px);
+      transition: all 0.2s ease;
       z-index: 1000;
+      font-size: 14px;
+      font-weight: 500;
     }
 
     .notification.show {
-      display: block;
       opacity: 1;
+      transform: translateY(0);
     }
   </style>
 </head>
 
 <body>
+  <!-- GitHub 链接 -->
+  <a href="https://github.com/poneding/2" target="_blank" rel="noopener noreferrer" class="github-link">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+        fill="currentColor" />
+    </svg>
+  </a>
+
   <div class="sidebar">
-    <h2>工具菜单</h2>
-    <button onclick="showTool('newlineTool')">换行符文本转换</button>
-    <button onclick="showTool('jsonTool')">JSON 格式化与压缩</button>
-    <button onclick="showTool('base64Tool')">Base64 编码解码</button>
-    <button onclick="showTool('urlTool')">URL 编码解码</button>
+    <div class="sidebar-header">
+      <h2 onclick="showHome()" style="cursor: pointer;">
+        <svg class="logo" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"
+            fill="currentColor" />
+          <path d="M14 2l-1 1 8 8 1-1-8-8zM6 14l-1 1 8 8 1-1-8-8z" fill="currentColor" opacity="0.7" />
+        </svg>
+        DevTools
+      </h2>
+    </div>
+    <div class="sidebar-nav">
+      <button class="nav-button active" onclick="showTool('newlineTool')">
+        <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 文本行背景 -->
+          <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1" />
+          <!-- 文本行 -->
+          <rect x="5" y="7" width="8" height="2" rx="1" fill="#495057" />
+          <rect x="14" y="7" width="5" height="2" rx="1" fill="#495057" />
+
+          <!-- 换行符指示 -->
+          <rect x="5" y="11" width="10" height="2" rx="1" fill="#495057" />
+          <path d="M16 12h2v-1h-1v-1h-1v2z" fill="#28a745" />
+          <text x="17" y="12" font-size="8" fill="#28a745" font-weight="bold">↵</text>
+
+          <!-- 下一行 -->
+          <rect x="5" y="15" width="14" height="2" rx="1" fill="#495057" />
+        </svg>
+        换行工具
+      </button>
+      <button class="nav-button" onclick="showTool('jsonTool')">
+        <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景 -->
+          <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1" />
+
+          <!-- JSON 结构 -->
+          <text x="4" y="9" font-size="6" fill="#dc3545" font-weight="bold">{</text>
+          <text x="8" y="12" font-size="5" fill="#6f42c1">"name"</text>
+          <text x="13" y="12" font-size="5" fill="#28a745">:</text>
+          <text x="15" y="12" font-size="5" fill="#fd7e14">"value"</text>
+          <text x="4" y="16" font-size="5" fill="#6f42c1">"count"</text>
+          <text x="11" y="16" font-size="5" fill="#28a745">:</text>
+          <text x="13" y="16" font-size="5" fill="#007bff">42</text>
+          <text x="17" y="12" font-size="5" fill="#6c757d">,</text>
+          <text x="4" y="18" font-size="6" fill="#dc3545" font-weight="bold">}</text>
+        </svg>
+        JSON 工具
+      </button>
+      <button class="nav-button" onclick="showTool('base64Tool')">
+        <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="4" width="6" height="16" rx="1" stroke="currentColor" stroke-width="2" />
+          <rect x="9" y="4" width="6" height="16" rx="1" stroke="currentColor" stroke-width="2" />
+          <rect x="15" y="4" width="6" height="16" rx="1" stroke="currentColor" stroke-width="2" />
+          <path d="M5 8h2M5 12h2M5 16h2M11 8h2M11 12h2M11 16h2M17 8h2M17 12h2M17 16h2" stroke="currentColor"
+            stroke-width="1" opacity="0.6" />
+        </svg>
+        Base64 工具
+      </button>
+      <button class="nav-button" onclick="showTool('urlTool')">
+        <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" />
+          <circle cx="12" cy="12" r="1" fill="currentColor" />
+        </svg>
+        URL 工具
+      </button>
+      <button class="nav-button" onclick="showTool('diffTool')">
+        <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1" />
+          <path d="M6 8h4M6 11h2M14 8h4M14 11h2M6 14h6M12 14h6" stroke="#dc3545" stroke-width="2"
+            stroke-linecap="round" />
+          <path d="M6 17h12" stroke="#28a745" stroke-width="2" stroke-linecap="round" />
+          <text x="7" y="16" font-size="6" fill="#dc3545" font-weight="bold">-</text>
+          <text x="15" y="16" font-size="6" fill="#28a745" font-weight="bold">+</text>
+        </svg>
+        文本Diff
+      </button>
+    </div>
   </div>
   <div class="content">
-    <!-- 换行符文本转换工具 -->
-    <div id="newlineTool" class="tool-container active">
-      <!-- 默认显示此工具 -->
-      <div class="tool">
-        <h2>换行符文本转换</h2>
-        <textarea id="inputText" placeholder="输入文本..."></textarea>
-        <br />
-        <button onclick="convertToNewlines()">转成多行</button>
-        <button onclick="convertToSymbols()">转成单行</button>
-        <div class="output-container">
-          <textarea id="outputText" placeholder="输出结果..." readonly></textarea>
-          <button class="copy-button" onclick="copyToClipboard('outputText')">
-            复制
-          </button>
+    <!-- 首页 -->
+    <div id="homePage" class="page-container active">
+      <div class="home-content">
+        <div class="hero-section">
+          <div class="hero-logo">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"
+                fill="var(--primary-color)" />
+              <path d="M14 2l-1 1 8 8 1-1-8-8zM6 14l-1 1 8 8 1-1-8-8z" fill="var(--primary-color)" opacity="0.7" />
+            </svg>
+          </div>
+          <h1 class="hero-title">DevTools</h1>
+          <p class="hero-subtitle">专业的在线开发工具箱</p>
+          <p class="hero-description">提供日常开发中常用的文本处理、编码转换、数据格式化等工具，让您的开发工作更加高效便捷。</p>
+        </div>
+
+        <div class="tools-grid">
+          <div class="tool-card" onclick="showTool('newlineTool')">
+            <div class="tool-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1" />
+                <rect x="5" y="7" width="8" height="2" rx="1" fill="#495057" />
+                <rect x="14" y="7" width="5" height="2" rx="1" fill="#495057" />
+                <rect x="5" y="11" width="10" height="2" rx="1" fill="#495057" />
+                <path d="M16 12h2v-1h-1v-1h-1v2z" fill="#28a745" />
+                <text x="17" y="12" font-size="8" fill="#28a745" font-weight="bold">↵</text>
+                <rect x="5" y="15" width="14" height="2" rx="1" fill="#495057" />
+              </svg>
+            </div>
+            <h3>换行符转换</h3>
+            <p>在文本换行符和转义序列之间进行转换，支持多行文本和单行文本的相互转换。</p>
+            <div class="tool-card-footer">
+              <span class="tool-badge">文本处理</span>
+            </div>
+          </div>
+
+          <div class="tool-card" onclick="showTool('jsonTool')">
+            <div class="tool-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1" />
+                <text x="4" y="9" font-size="6" fill="#dc3545" font-weight="bold">{</text>
+                <text x="8" y="12" font-size="5" fill="#6f42c1">"name"</text>
+                <text x="13" y="12" font-size="5" fill="#28a745">:</text>
+                <text x="15" y="12" font-size="5" fill="#fd7e14">"value"</text>
+                <text x="4" y="16" font-size="5" fill="#6f42c1">"count"</text>
+                <text x="11" y="16" font-size="5" fill="#28a745">:</text>
+                <text x="13" y="16" font-size="5" fill="#007bff">42</text>
+                <text x="17" y="12" font-size="5" fill="#6c757d">,</text>
+                <text x="4" y="18" font-size="6" fill="#dc3545" font-weight="bold">}</text>
+              </svg>
+            </div>
+            <h3>JSON 工具</h3>
+            <p>格式化和压缩 JSON 数据，支持验证和美化显示，让 JSON 数据更加易读和规范。</p>
+            <div class="tool-card-footer">
+              <span class="tool-badge">数据格式</span>
+            </div>
+          </div>
+
+          <div class="tool-card" onclick="showTool('base64Tool')">
+            <div class="tool-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="5" width="7" height="14" rx="1" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5" />
+                <rect x="14" y="5" width="7" height="14" rx="1" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" />
+                <rect x="8.5" y="5" width="7" height="14" rx="1" fill="#e8f5e8" stroke="#388e3c" stroke-width="1.5" />
+                <circle cx="6.5" cy="8.5" r="1" fill="#1976d2" />
+                <circle cx="12" cy="8.5" r="1" fill="#388e3c" />
+                <circle cx="17.5" cy="8.5" r="1" fill="#7b1fa2" />
+                <path d="M10 12h4M10 15h4" stroke="#666" stroke-width="1" stroke-dasharray="2 2" />
+              </svg>
+            </div>
+            <h3>Base64 工具</h3>
+            <p>Base64 编码和解码，支持文本和二进制数据转换，广泛用于数据传输和存储。</p>
+            <div class="tool-card-footer">
+              <span class="tool-badge">编码转换</span>
+            </div>
+          </div>
+
+          <div class="tool-card" onclick="showTool('urlTool')">
+            <div class="tool-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1" />
+                <path d="M6 9h6a4 4 0 0 1 0 8H6" stroke="#0969da" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <path d="M18 15h-6a4 4 0 0 1 0-8h6" stroke="#0969da" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <circle cx="12" cy="13" r="1.5" fill="#0969da" />
+                <circle cx="12" cy="9" r="1.5" fill="#0969da" />
+                <text x="5" y="8" font-size="4" fill="#666">https://</text>
+              </svg>
+            </div>
+            <h3>URL 工具</h3>
+            <p>URL 编码和解码，处理特殊字符和查询参数，确保 URL 的正确传输和解析。</p>
+            <div class="tool-card-footer">
+              <span class="tool-badge">网络工具</span>
+            </div>
+          </div>
+
+          <div class="tool-card" onclick="showTool('diffTool')">
+            <div class="tool-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1" />
+                <rect x="5" y="7" width="6" height="2" rx="0.5" fill="#dc3545" />
+                <rect x="13" y="7" width="6" height="2" rx="0.5" fill="#28a745" />
+                <rect x="5" y="11" width="14" height="2" rx="0.5" fill="#6c757d" />
+                <rect x="5" y="15" width="8" height="2" rx="0.5" fill="#6c757d" />
+                <rect x="15" y="15" width="3" height="2" rx="0.5" fill="#28a745" />
+                <circle cx="6" cy="8" r="1" fill="#dc3545" />
+                <circle cx="16" cy="8" r="1" fill="#28a745" />
+              </svg>
+            </div>
+            <h3>文本Diff</h3>
+            <p>专业的文本差异比较工具，支持并排对比和统一视图，高亮显示增删改内容，适用于代码审查和版本对比。</p>
+            <div class="tool-card-footer">
+              <span class="tool-badge">文本比较</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="features-section">
+          <h2>为什么选择 DevTools？</h2>
+          <div class="features-grid">
+            <div class="feature-item">
+              <div class="feature-icon">🚀</div>
+              <h4>快速高效</h4>
+              <p>本地处理，无需网络，即开即用</p>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">🔒</div>
+              <h4>安全隐私</h4>
+              <p>所有数据在本地处理，保护您的隐私</p>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">🎨</div>
+              <h4>现代设计</h4>
+              <p>简洁优雅的界面，支持深色/浅色主题</p>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">⚡</div>
+              <h4>实时预览</h4>
+              <p>即时查看处理结果，操作流畅</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- JSON 格式化与压缩工具 -->
-    <div id="jsonTool" class="tool-container">
-      <div class="tool">
-        <h2>JSON 格式化与压缩</h2>
-        <textarea id="inputJson" placeholder="输入 JSON..."></textarea>
-        <br />
-        <button onclick="formatJson()">JSON 格式化</button>
-        <button onclick="compressJson()">JSON 压缩</button>
-        <div class="output-container">
-          <textarea id="outputJson" placeholder="输出结果..." readonly></textarea>
-          <button class="copy-button" onclick="copyToClipboard('outputJson')">
-            复制
-          </button>
+    <!-- 工具页面容器 -->
+    <div id="toolsPage" class="page-container">
+      <div class="content-header">
+        <h1 id="currentToolTitle">换行工具</h1>
+        <p id="currentToolDesc">在文本换行符和转义序列之间进行转换</p>
+      </div>
+      <!-- 换行工具 -->
+      <div id="newlineTool" class="tool-container">
+        <div class="tool">
+          <div class="input-group">
+            <label for="inputText">输入文本</label>
+            <textarea id="inputText" placeholder="输入包含换行符或 \n 转义序列的文本..."></textarea>
+          </div>
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="convertToNewlines()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 7h10M7 12h10M7 17h7M4 7v10M14 17v-4" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              转成多行
+            </button>
+            <button class="btn btn-secondary" onclick="convertToSymbols()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 7h10M7 12h10M7 17h10M4 7v10M20 17v-4" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M15 17c0-2.2-1.8-4-4-4s-4 1.8-4 4" stroke="currentColor" stroke-width="1.5"
+                  stroke-dasharray="2 2" />
+              </svg>
+              转成单行
+            </button>
+          </div>
+          <div class="output-group">
+            <label for="outputText">转换结果</label>
+            <div class="output-container">
+              <textarea id="outputText" class="output-textarea" placeholder="转换结果将显示在这里..." readonly></textarea>
+              <button class="copy-button" onclick="copyToClipboard('outputText')">复制</button>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <!-- JSON 格式化与压缩工具 -->
+      <div id="jsonTool" class="tool-container">
+        <div class="tool">
+          <div class="input-group">
+            <label for="inputJson">输入 JSON</label>
+            <textarea id="inputJson" placeholder="输入 JSON 数据..."></textarea>
+          </div>
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="formatJson()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" stroke="currentColor" stroke-width="2" />
+                <path d="M14 14h6v6h-6zM7 7h2M7 12h2M7 17h2M17 7h2M17 12h2M17 17h2" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" />
+                <path d="M12 7v2M12 12v2M12 17v2" stroke="currentColor" stroke-width="1" opacity="0.6" />
+              </svg>
+              格式化
+            </button>
+            <button class="btn btn-secondary" onclick="compressJson()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4" y="6" width="16" height="4" rx="1" stroke="currentColor" stroke-width="2" />
+                <rect x="4" y="12" width="12" height="2" rx="1" stroke="currentColor" stroke-width="2" />
+                <rect x="4" y="16" width="14" height="2" rx="1" stroke="currentColor" stroke-width="2" />
+                <path d="M20 8v8M4 14v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+              压缩
+            </button>
+          </div>
+          <div class="output-group">
+            <label for="outputJson">处理结果</label>
+            <div class="output-container">
+              <textarea id="outputJson" class="output-textarea" placeholder="JSON 处理结果将显示在这里..." readonly></textarea>
+              <button class="copy-button" onclick="copyToClipboard('outputJson')">复制</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Base64 编码解码工具 -->
+      <div id="base64Tool" class="tool-container">
+        <div class="tool">
+          <div class="input-group">
+            <label for="inputBase64">输入内容</label>
+            <textarea id="inputBase64" placeholder="输入要编码的文本或要解码的 Base64 编码..."></textarea>
+          </div>
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="encodeBase64()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="5" width="7" height="14" rx="1" stroke="currentColor" stroke-width="2" />
+                <rect x="14" y="5" width="7" height="14" rx="1" stroke="currentColor" stroke-width="2" />
+                <path d="M10 10h4M10 14h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <circle cx="6.5" cy="8.5" r="1" fill="currentColor" />
+                <circle cx="17.5" cy="8.5" r="1" fill="currentColor" />
+              </svg>
+              编码
+            </button>
+            <button class="btn btn-secondary" onclick="decodeBase64()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="14" y="5" width="7" height="14" rx="1" stroke="currentColor" stroke-width="2" />
+                <rect x="3" y="5" width="7" height="14" rx="1" stroke="currentColor" stroke-width="2" />
+                <path d="M10 10h4M10 14h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-dasharray="2 2" />
+                <circle cx="17.5" cy="8.5" r="1" fill="currentColor" />
+                <circle cx="6.5" cy="8.5" r="1" fill="currentColor" />
+                <path d="M12 7v10" stroke="currentColor" stroke-width="1" stroke-dasharray="1 2" opacity="0.6" />
+              </svg>
+              解码
+            </button>
+          </div>
+          <div class="output-group">
+            <label for="outputBase64">处理结果</label>
+            <div class="output-container">
+              <textarea id="outputBase64" class="output-textarea" placeholder="Base64 处理结果将显示在这里..."
+                readonly></textarea>
+              <button class="copy-button" onclick="copyToClipboard('outputBase64')">复制</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- URL 编码解码工具 -->
+      <div id="urlTool" class="tool-container">
+        <div class="tool">
+          <div class="input-group">
+            <label for="inputUrl">输入 URL</label>
+            <textarea id="inputUrl" placeholder="输入要编码或解码的 URL/文本..."></textarea>
+          </div>
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="encodeUrl()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 9h6a4 4 0 0 1 0 8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <path d="M18 15h-6a4 4 0 0 1 0-8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <circle cx="12" cy="13" r="1" fill="currentColor" />
+                <circle cx="12" cy="9" r="1" fill="currentColor" />
+              </svg>
+              编码
+            </button>
+            <button class="btn btn-secondary" onclick="decodeUrl()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 15h6a4 4 0 0 0 0-8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <path d="M18 9h-6a4 4 0 0 0 0 8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <circle cx="12" cy="13" r="1" fill="currentColor" />
+                <circle cx="12" cy="9" r="1" fill="currentColor" />
+                <path d="M8 12h8" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2" opacity="0.6" />
+              </svg>
+              解码
+            </button>
+          </div>
+          <div class="output-group">
+            <label for="outputUrl">处理结果</label>
+            <div class="output-container">
+              <textarea id="outputUrl" class="output-textarea" placeholder="URL 处理结果将显示在这里..." readonly></textarea>
+              <button class="copy-button" onclick="copyToClipboard('outputUrl')">复制</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 文本Diff工具 -->
+      <div id="diffTool" class="tool-container">
+        <div class="tool diff-tool">
+          <div class="diff-container">
+            <div id="diffEditor" class="diff-editor"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 添加复制成功的提示框 -->
+      <div id="copyNotification" class="notification" style="display: none">
+        复制成功！
       </div>
     </div>
 
-    <!-- 在工具内容区添加 Base64 编码解码工具 -->
-    <div id="base64Tool" class="tool-container">
-      <div class="tool">
-        <h2>Base64 编码解码工具</h2>
-        <textarea id="inputBase64" placeholder="输入文本或 Base64 编码..."></textarea>
-        <br />
-        <button onclick="encodeBase64()">Base64 编码</button>
-        <button onclick="decodeBase64()">Base64 解码</button>
-        <div class="output-container">
-          <textarea id="outputBase64" placeholder="输出结果..." readonly></textarea>
-          <button class="copy-button" onclick="copyToClipboard('outputBase64')">
-            复制
-          </button>
-        </div>
-      </div>
-    </div>
+    <script>
+      // 工具配置
+      const tools = {
+        newlineTool: {
+          title: '换行工具',
+          description: '在文本换行符和转义序列之间进行转换'
+        },
+        jsonTool: {
+          title: 'JSON 工具',
+          description: '格式化和压缩 JSON 数据，支持验证和美化显示'
+        },
+        base64Tool: {
+          title: 'Base64 工具',
+          description: 'Base64 编码和解码，支持文本和二进制数据'
+        },
+        urlTool: {
+          title: 'URL 工具',
+          description: 'URL 编码和解码，处理特殊字符和查询参数'
+        },
+        diffTool: {
+          title: '文本Diff',
+          description: '实时文本差异比较工具，支持直接编辑和语法高亮'
+        }
+      };
 
-    <!-- URL 编码解码工具 -->
-    <div id="urlTool" class="tool-container">
-      <div class="tool">
-        <h2>URL 编码解码工具</h2>
-        <textarea id="inputUrl" placeholder="输入URL或文本..."></textarea>
-        <button onclick="encodeUrl()">URL 编码</button>
-        <button onclick="decodeUrl()">URL 解码</button>
-        <div class="output-container">
-          <textarea id="outputUrl" placeholder="输出结果..." readonly></textarea>
-          <button class="copy-button" onclick="copyToClipboard('outputUrl')">复制</button>
-        </div>
-      </div>
-    </div>
+      // 默认显示首页
+      document.addEventListener("DOMContentLoaded", () => {
+        showHome();
+      });
 
-    <!-- 添加复制成功的提示框 -->
-    <div id="copyNotification" class="notification" style="display: none">
-      复制成功！
-    </div>
-  </div>
+      // 显示首页
+      function showHome() {
+        // 隐藏所有页面容器
+        const pages = document.querySelectorAll(".page-container");
+        pages.forEach((page) => page.classList.remove("active"));
 
-  <script>
-    // 默认显示第一个工具
-    document.getElementById("newlineTool").classList.add("active");
+        // 显示首页
+        document.getElementById("homePage").classList.add("active");
 
-    function showTool(toolId) {
-      // 隐藏所有工具
-      const tools = document.querySelectorAll(".tool-container");
-      tools.forEach((tool) => tool.classList.remove("active"));
+        // 移除所有导航按钮的激活状态
+        const navButtons = document.querySelectorAll(".nav-button");
+        navButtons.forEach((button) => button.classList.remove("active"));
+      }
 
-      // 显示选中的工具
-      document.getElementById(toolId).classList.add("active");
-    }
+      // 显示工具页面
+      function showTool(toolId) {
+        // 隐藏所有页面容器
+        const pages = document.querySelectorAll(".page-container");
+        pages.forEach((page) => page.classList.remove("active"));
 
-    function convertToNewlines() {
-      const inputText = document.getElementById("inputText").value;
-      const convertedText = inputText.replace(/\\n/g, "\n");
-      document.getElementById("outputText").value = convertedText;
-    }
+        // 显示工具页面
+        document.getElementById("toolsPage").classList.add("active");
 
-    function convertToSymbols() {
-      const inputText = document.getElementById("inputText").value;
-      const convertedText = inputText.replace(/\n/g, "\\n");
-      document.getElementById("outputText").value = convertedText;
-    }
+        // 隐藏所有工具容器
+        const tools = document.querySelectorAll(".tool-container");
+        tools.forEach((tool) => tool.classList.remove("active"));
 
-    function formatJson() {
-      try {
+        // 移除所有导航按钮的激活状态
+        const navButtons = document.querySelectorAll(".nav-button");
+        navButtons.forEach((button) => button.classList.remove("active"));
+
+        // 显示选中的工具
+        document.getElementById(toolId).classList.add("active");
+
+        // 激活对应的导航按钮
+        const activeButton = document.querySelector(`[onclick="showTool('${toolId}')"]`);
+        if (activeButton) {
+          activeButton.classList.add("active");
+        }
+
+        // 如果是diff工具，初始化编辑器
+        if (toolId === 'diffTool') {
+          initDiffEditors();
+        }
+
+        // 更新内容头部
+        updateContentHeader(toolId);
+      }
+
+      function updateContentHeader(toolId) {
+        const tool = tools[toolId];
+        if (tool) {
+          document.getElementById("currentToolTitle").textContent = tool.title;
+          document.getElementById("currentToolDesc").textContent = tool.description;
+        }
+      }
+
+      function convertToNewlines() {
+        const inputText = document.getElementById("inputText").value;
+        const convertedText = inputText.replace(/\\n/g, "\n");
+        document.getElementById("outputText").value = convertedText;
+      }
+
+      function convertToSymbols() {
+        const inputText = document.getElementById("inputText").value;
+        const convertedText = inputText.replace(/\n/g, "\\n");
+        document.getElementById("outputText").value = convertedText;
+      }
+
+      function formatJson() {
         const inputJson = document.getElementById("inputJson").value;
-        const parsedJson = JSON.parse(inputJson);
-        const formattedJson = JSON.stringify(parsedJson, null, 4);
-        document.getElementById("outputJson").value = formattedJson;
-      } catch (error) {
-        alert("无效的 JSON 输入，请检查格式！");
-      }
-    }
+        const outputJson = document.getElementById("outputJson");
 
-    function compressJson() {
-      try {
+        if (!inputJson.trim()) {
+          showError('请输入 JSON 数据');
+          return;
+        }
+
+        try {
+          const parsedJson = JSON.parse(inputJson);
+          const formattedJson = JSON.stringify(parsedJson, null, 2);
+          outputJson.value = formattedJson;
+          showSuccess('JSON 格式化成功');
+        } catch (error) {
+          outputJson.value = `JSON 解析错误: ${error.message}`;
+          showError('JSON 格式无效，请检查语法');
+        }
+      }
+
+      function compressJson() {
         const inputJson = document.getElementById("inputJson").value;
-        const parsedJson = JSON.parse(inputJson);
-        const compressedJson = JSON.stringify(parsedJson);
-        document.getElementById("outputJson").value = compressedJson;
-      } catch (error) {
-        alert("无效的 JSON 输入，请检查格式！");
+        const outputJson = document.getElementById("outputJson");
+
+        if (!inputJson.trim()) {
+          showError('请输入 JSON 数据');
+          return;
+        }
+
+        try {
+          const parsedJson = JSON.parse(inputJson);
+          const compressedJson = JSON.stringify(parsedJson);
+          outputJson.value = compressedJson;
+          showSuccess('JSON 压缩成功');
+        } catch (error) {
+          outputJson.value = `JSON 解析错误: ${error.message}`;
+          showError('JSON 格式无效，请检查语法');
+        }
       }
-    }
 
-    function copyToClipboard(elementId) {
-      const output = document.getElementById(elementId);
-      output.select();
-      output.setSelectionRange(0, 99999);
-      document.execCommand("copy");
+      function copyToClipboard(elementId) {
+        const output = document.getElementById(elementId);
 
-      // 显示非阻塞的复制成功提示
-      showCopyNotification();
-    }
+        if (!output.value.trim()) {
+          showError('没有内容可复制');
+          return;
+        }
 
-    function showCopyNotification() {
-      const notification = document.getElementById("copyNotification");
-      notification.style.display = "block"; // 确保元素被显示
-      notification.classList.add("show");
+        // 现代方法
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(output.value).then(() => {
+            showSuccess('已复制到剪贴板');
+          }).catch(() => {
+            fallbackCopyToClipboard(output);
+          });
+        } else {
+          // 回退方法
+          fallbackCopyToClipboard(output);
+        }
+      }
 
-      // 2秒后隐藏提示
-      setTimeout(() => {
-        notification.classList.remove("show");
-        setTimeout(() => (notification.style.display = "none"), 500); // 0.5秒后隐藏元素
-      }, 2000);
-    }
+      function fallbackCopyToClipboard(output) {
+        output.select();
+        output.setSelectionRange(0, 99999);
 
-    function encodeBase64() {
-      try {
+        try {
+          document.execCommand("copy");
+          showSuccess('已复制到剪贴板');
+        } catch (err) {
+          showError('复制失败，请手动复制');
+        }
+      }
+
+      function showNotification(message, type = 'success') {
+        const notification = document.getElementById("copyNotification");
+        notification.textContent = message;
+        notification.style.background = type === 'success' ? 'var(--success-color)' : '#da3633';
+        notification.style.display = "block";
+        notification.classList.add("show");
+
+        // 2秒后隐藏提示
+        setTimeout(() => {
+          notification.classList.remove("show");
+          setTimeout(() => (notification.style.display = "none"), 200);
+        }, 2000);
+      }
+
+      function showSuccess(message) {
+        showNotification(message, 'success');
+      }
+
+      function showError(message) {
+        showNotification(message, 'error');
+      }
+
+      // Diff 工具相关变量
+      let diffEditor = null;
+      let monacoLoaded = false;
+
+      // 加载 Monaco Editor
+      function loadMonaco() {
+        if (monacoLoaded) return Promise.resolve();
+
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js';
+          script.onload = () => {
+            require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } });
+            require(['vs/editor/editor.main'], function () {
+              monacoLoaded = true;
+              resolve();
+            });
+          };
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      // 初始化Diff编辑器
+      async function initDiffEditors() {
+        await loadMonaco();
+
+        const theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'vs-dark' : 'vs';
+
+        // 初始化Diff编辑器
+        const diffContainer = document.getElementById('diffEditor');
+        diffEditor = monaco.editor.createDiffEditor(diffContainer, {
+          theme: theme,
+          automaticLayout: true,
+          renderSideBySide: true,
+          readOnly: false,
+          enableSplitViewResizing: true,
+          renderOverviewRuler: true,
+          diffAlgorithm: 'smart',
+          renderMarginRevertIcon: true,
+          ignoreTrimWhitespace: false,
+          renderWhitespace: 'selection',
+          scrollBeyondLastLine: false,
+          minimap: { enabled: false },
+          fontSize: 14,
+          lineNumbers: 'on',
+          roundedSelection: false,
+          originalEditable: true,
+          modifiedEditable: true,
+          semanticHighlighting: false,
+          fontFamily: 'Cascadia Mono,Consolas, Menlo, Monaco, Ubuntu Mono, monospace',
+        });
+
+        // 设置初始内容
+        const originalText = '// 左侧：原始版本\nfunction hello() {\n  console.log("Hello, World!");\n}';
+        const modifiedText = '// 右侧：修改版本\nfunction hello() {\n  console.log("Hello, World!");\n  console.log("这是一个修改后的版本");\n}';
+
+        const language = detectLanguage(originalText, modifiedText);
+        const originalModel = monaco.editor.createModel(originalText, language);
+        const modifiedModel = monaco.editor.createModel(modifiedText, language);
+
+        diffEditor.setModel({
+          original: originalModel,
+          modified: modifiedModel
+        });
+
+        // 监听主题变化
+        if (window.matchMedia) {
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            const newTheme = e.matches ? 'vs-dark' : 'vs';
+            if (diffEditor) monaco.editor.setTheme(newTheme);
+          });
+        }
+
+        // 监听模型变化，实现实时diff
+        diffEditor.onDidUpdateDiff(() => {
+          // diff已经自动更新，不需要额外处理
+        });
+      }
+
+
+      // 检测语言类型
+      function detectLanguage(text1, text2) {
+        const combinedText = text1 + '\n' + text2;
+
+        // 检测JavaScript
+        if (combinedText.includes('function') || combinedText.includes('const ') || combinedText.includes('let ') || combinedText.includes('=>')) {
+          return 'javascript';
+        }
+
+        // 检测JSON
+        try {
+          JSON.parse(text1);
+          return 'json';
+        } catch {
+          try {
+            JSON.parse(text2);
+            return 'json';
+          } catch {
+            // 不是JSON
+          }
+        }
+
+        // 检测HTML
+        if (combinedText.includes('<') && combinedText.includes('>') && combinedText.includes('</')) {
+          return 'html';
+        }
+
+        // 检测CSS
+        if (combinedText.includes('{') && combinedText.includes(':') && combinedText.includes(';')) {
+          return 'css';
+        }
+
+        // 检测Python
+        if (combinedText.includes('def ') || combinedText.includes('import ') || combinedText.includes('print(') || combinedText.includes('#')) {
+          return 'python';
+        }
+
+        // 检测TypeScript
+        if (combinedText.includes('interface ') || combinedText.includes('type ') || combinedText.includes(': string')) {
+          return 'typescript';
+        }
+
+        // 检测Markdown
+        if (combinedText.includes('#') || combinedText.includes('**') || combinedText.includes('```')) {
+          return 'markdown';
+        }
+
+        // 检测XML
+        if (combinedText.includes('<?xml') || (combinedText.includes('<') && combinedText.includes('</') && !combinedText.includes('<!DOCTYPE'))) {
+          return 'xml';
+        }
+
+        // 检测YAML
+        if (combinedText.includes(':') && !combinedText.includes('{') && !combinedText.includes('<')) {
+          return 'yaml';
+        }
+
+        // 默认为纯文本
+        return 'plaintext';
+      }
+
+      function encodeBase64() {
         const input = document.getElementById("inputBase64").value;
-        const encoded = btoa(input); // 使用 btoa 进行 Base64 编码
-        document.getElementById("outputBase64").value = encoded;
-      } catch (error) {
-        alert("编码失败，请检查输入内容！");
-      }
-    }
+        const output = document.getElementById("outputBase64");
 
-    function decodeBase64() {
-      try {
+        if (!input.trim()) {
+          showError('请输入要编码的内容');
+          return;
+        }
+
+        try {
+          const encoded = btoa(unescape(encodeURIComponent(input)));
+          output.value = encoded;
+          showSuccess('Base64 编码成功');
+        } catch (error) {
+          output.value = `编码错误: ${error.message}`;
+          showError('Base64 编码失败');
+        }
+      }
+
+      function decodeBase64() {
         const input = document.getElementById("inputBase64").value;
-        const decoded = atob(input); // 使用 atob 进行 Base64 解码
-        document.getElementById("outputBase64").value = decoded;
-      } catch (error) {
-        alert("解码失败，请确保输入的是有效的 Base64 编码！");
-      }
-    }
+        const output = document.getElementById("outputBase64");
 
-    function encodeUrl() {
-      try {
-        const input = document.getElementById("inputUrl").value;
-        const encoded = encodeURIComponent(input);
-        document.getElementById("outputUrl").value = encoded;
-      } catch (error) {
-        alert("编码失败，请检查输入内容！");
-      }
-    }
+        if (!input.trim()) {
+          showError('请输入要解码的 Base64 编码');
+          return;
+        }
 
-    function decodeUrl() {
-      try {
-        const input = document.getElementById("inputUrl").value;
-        const decoded = decodeURIComponent(input);
-        document.getElementById("outputUrl").value = decoded;
-      } catch (error) {
-        alert("解码失败，请确保输入的是有效的URL编码！");
+        try {
+          const decoded = decodeURIComponent(escape(atob(input)));
+          output.value = decoded;
+          showSuccess('Base64 解码成功');
+        } catch (error) {
+          output.value = `解码错误: 无效的 Base64 编码`;
+          showError('Base64 解码失败，请检查输入格式');
+        }
       }
-    }
-  </script>
+
+      function encodeUrl() {
+        const input = document.getElementById("inputUrl").value;
+        const output = document.getElementById("outputUrl");
+
+        if (!input.trim()) {
+          showError('请输入要编码的内容');
+          return;
+        }
+
+        try {
+          const encoded = encodeURIComponent(input);
+          output.value = encoded;
+          showSuccess('URL 编码成功');
+        } catch (error) {
+          output.value = `编码错误: ${error.message}`;
+          showError('URL 编码失败');
+        }
+      }
+
+      function decodeUrl() {
+        const input = document.getElementById("inputUrl").value;
+        const output = document.getElementById("outputUrl");
+
+        if (!input.trim()) {
+          showError('请输入要解码的 URL 编码');
+          return;
+        }
+
+        try {
+          const decoded = decodeURIComponent(input);
+          output.value = decoded;
+          showSuccess('URL 解码成功');
+        } catch (error) {
+          output.value = `解码错误: 无效的 URL 编码`;
+          showError('URL 解码失败，请检查输入格式');
+        }
+      }
+    </script>
 </body>
 
 </html>
