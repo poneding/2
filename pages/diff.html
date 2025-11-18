@@ -213,11 +213,12 @@
             }
 
             const emptyText = '';
-            const emptyModel = monaco.editor.createModel(emptyText, 'plaintext');
+            const originalModel = monaco.editor.createModel(emptyText, 'plaintext');
+            const modifiedModel = monaco.editor.createModel(emptyText, 'plaintext');
 
             this.diffEditor.setModel({
-              original: emptyModel,
-              modified: emptyModel
+              original: originalModel,
+              modified: modifiedModel
             });
 
             this.updateStatus('已清空所有内容');
