@@ -6,28 +6,77 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>换行工具 - DevTools</title>
 
+  <!-- Monaco Editor CSS -->
+  <link rel="stylesheet" data-name="vs/editor/editor.main"
+    href="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/editor/editor.main.css">
+
   <!-- 共享样式 -->
   <link rel="stylesheet" href="../css/common.css">
+
+  <!-- 换行工具特定样式 -->
+  <style>
+    .newline-tool {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .newline-controls {
+      display: flex;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) 0;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .newline-editor-container {
+      flex: 1;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--bg-tertiary);
+      min-height: 0;
+    }
+
+    .newline-editor {
+      width: 100%;
+      height: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .newline-controls {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  
+
   <div class="content">
     <div class="content-header">
-      <h1>换行工具</h1>
+      <h1>
+        <svg class="tool-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+          style="margin-right: 8px; vertical-align: middle;">
+          <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1" />
+          <rect x="5" y="7" width="8" height="2" rx="1" fill="#495057" />
+          <rect x="14" y="7" width="5" height="2" rx="1" fill="#495057" />
+          <rect x="5" y="11" width="10" height="2" rx="1" fill="#495057" />
+          <path d="M16 12h2v-1h-1v-1h-1v2z" fill="#28a745" />
+          <text x="17" y="12" font-size="8" fill="#28a745" font-weight="bold">↵</text>
+          <rect x="5" y="15" width="14" height="2" rx="1" fill="#495057" />
+        </svg>
+        换行工具
+      </h1>
       <p>在文本换行符和转义序列之间进行转换</p>
     </div>
 
     <div class="tool-page-content">
       <div class="tool-page-body">
-
-        <div class="tool">
-          <div class="input-group">
-            <label for="inputText">输入文本</label>
-            <textarea id="inputText" placeholder="输入包含换行符或 \n 转义序列的文本..."></textarea>
-          </div>
-
-          <div class="button-group">
+        <div class="newline-tool">
+          <!-- 控制按钮 -->
+          <div class="newline-controls">
             <button class="btn btn-primary" onclick="convertToNewlines()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7 7h10M7 12h10M7 17h7M4 7v10M14 17v-4" stroke="currentColor" stroke-width="2"
@@ -44,14 +93,26 @@
               </svg>
               转成单行
             </button>
+            <button class="btn btn-secondary" onclick="copyOutput()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" />
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2" />
+              </svg>
+              复制结果
+            </button>
+            <button class="btn btn-secondary" onclick="clearAll()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14zM10 11v6M14 11v6"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+              清空
+            </button>
           </div>
 
-          <div class="output-group">
-            <label for="outputText">转换结果</label>
-            <div class="output-container">
-              <textarea id="outputText" class="output-textarea" placeholder="转换结果将显示在这里..." readonly></textarea>
-              <button class="copy-button" onclick="copyToClipboard('outputText')">复制</button>
-            </div>
+          <!-- 编辑器容器 -->
+          <div class="newline-editor-container">
+            <div id="newlineEditor" class="newline-editor"></div>
           </div>
         </div>
       </div>
@@ -61,101 +122,211 @@
   <!-- 共享JavaScript -->
   <script src="../js/common.js"></script>
 
+  <!-- Monaco Editor JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+
   <!-- 页面特定JavaScript -->
   <script>
-    class NewlineTool extends ToolPage {
+    let newlineEditor;
+    let newlineTool;
+
+    // 初始化Monaco Editor
+    function initMonacoEditor() {
+      require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } });
+      require(['vs/editor/editor.main'], function () {
+        // 创建换行工具编辑器
+        newlineEditor = monaco.editor.create(document.getElementById('newlineEditor'), {
+          value: '',
+          language: 'plaintext',
+          theme: getMonacoTheme(),
+          automaticLayout: true,
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          wordWrap: 'on',
+          formatOnPaste: true,
+          suggest: {
+            showKeywords: false,
+            showSnippets: false
+          },
+          quickSuggestions: {
+            other: false,
+            comments: false,
+            strings: false
+          }
+        });
+
+        // 初始化工具
+        newlineTool = new NewlineTool();
+        newlineTool.init();
+
+        // 设置焦点到编辑器
+        newlineEditor.focus();
+      });
+    }
+
+    // 获取Monaco主题
+    function getMonacoTheme() {
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'vs-dark'
+        : 'vs';
+    }
+
+    class NewlineTool {
       constructor() {
-        super('newline');
-        this.bindEvents();
       }
 
-      bindEvents() {
-        // 绑定输入变化事件（可选：实时转换）
-        const inputText = document.getElementById('inputText');
-        if (inputText) {
-          inputText.addEventListener('input', () => {
-            // 可选：启用实时转换
-            // this.autoConvert();
+      init() {
+        // 监听主题变化
+        if (window.matchMedia) {
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            const newTheme = getMonacoTheme();
+            monaco.editor.setTheme(newTheme);
+            newlineEditor.updateOptions({ theme: newTheme });
           });
         }
+
+        // 添加键盘快捷键
+        this.addKeyboardShortcuts();
+      }
+
+      addKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            this.convertToNewlines();
+          }
+          if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
+            e.preventDefault();
+            this.convertToSymbols();
+          }
+        });
       }
 
       convertToNewlines() {
-        const inputText = document.getElementById("inputText").value;
-        const outputText = document.getElementById("outputText");
+        console.log('convertToNewlines method called');
+        const currentText = newlineEditor.getValue();
+        console.log('Current text:', JSON.stringify(currentText));
 
-        if (!inputText.trim()) {
+        if (!currentText.trim()) {
           this.showError('请输入要转换的文本');
           return;
         }
 
         try {
-          const convertedText = inputText.replace(/\\n/g, "\n");
-          outputText.value = convertedText;
+          // 将转义的换行符转换为实际的换行符
+          // 先处理 \r\n，避免被单独的 \n 和 \r 处理破坏
+          let convertedText = currentText.replace(/\\r\\n/g, "\r\n");
+          convertedText = convertedText.replace(/\\r/g, "\r");
+          convertedText = convertedText.replace(/\\n/g, "\n");
+
+          console.log('Converted text:', JSON.stringify(convertedText));
+          newlineEditor.setValue(convertedText);
           this.showSuccess('已转换为多行格式');
         } catch (error) {
-          outputText.value = `转换错误: ${error.message}`;
+          console.error('Error in convertToNewlines:', error);
+          newlineEditor.setValue(`转换错误: ${error.message}`);
           this.showError('转换失败，请检查输入格式');
         }
       }
 
       convertToSymbols() {
-        const inputText = document.getElementById("inputText").value;
-        const outputText = document.getElementById("outputText");
+        console.log('convertToSymbols method called');
+        const currentText = newlineEditor.getValue();
+        console.log('Current text:', JSON.stringify(currentText));
 
-        if (!inputText.trim()) {
+        if (!currentText.trim()) {
           this.showError('请输入要转换的文本');
           return;
         }
 
         try {
-          const convertedText = inputText.replace(/\n/g, "\\n");
-          outputText.value = convertedText;
+          // 将实际的换行符转换为转义的 \n
+          // 先处理 \r\n，避免重复处理 \n
+          let convertedText = currentText.replace(/\r\n/g, "\\r\\n");
+          convertedText = convertedText.replace(/\r/g, "\\r");
+          convertedText = convertedText.replace(/\n/g, "\\n");
+
+          console.log('Converted text:', JSON.stringify(convertedText));
+          newlineEditor.setValue(convertedText);
           this.showSuccess('已转换为单行格式');
         } catch (error) {
-          outputText.value = `转换错误: ${error.message}`;
+          console.error('Error in convertToSymbols:', error);
+          newlineEditor.setValue(`转换错误: ${error.message}`);
           this.showError('转换失败，请检查输入格式');
         }
       }
 
-      autoConvert() {
-        // 自动检测并转换（可选功能）
-        const inputText = document.getElementById("inputText").value;
-        if (inputText.includes('\\n')) {
-          this.convertToNewlines();
-        } else if (inputText.includes('\n')) {
-          this.convertToSymbols();
+      copyOutput() {
+        const editorValue = newlineEditor ? newlineEditor.getValue() : '';
+        if (editorValue) {
+          navigator.clipboard.writeText(editorValue).then(() => {
+            if (window.showNotification) {
+              window.showNotification('已复制到剪贴板', 'success');
+            }
+          }).catch(() => {
+            if (window.showNotification) {
+              window.showNotification('复制失败', 'error');
+            }
+          });
+        }
+      }
+
+      clearAll() {
+        if (newlineEditor) {
+          newlineEditor.setValue('');
+          newlineEditor.focus();
+        }
+      }
+
+      showError(message) {
+        if (window.showNotification) {
+          window.showNotification(message, 'error');
+        } else {
+          alert(message);
+        }
+      }
+
+      showSuccess(message) {
+        if (window.showNotification) {
+          window.showNotification(message, 'success');
         }
       }
     }
 
     // 全局函数，供按钮调用
     function convertToNewlines() {
-      window.newlineTool.convertToNewlines();
+      console.log('convertToNewlines called', newlineTool, newlineEditor);
+      if (newlineTool && newlineEditor) {
+        newlineTool.convertToNewlines();
+      } else {
+        console.error('Tool or editor not initialized');
+      }
     }
 
     function convertToSymbols() {
-      window.newlineTool.convertToSymbols();
+      console.log('convertToSymbols called', newlineTool, newlineEditor);
+      if (newlineTool && newlineEditor) {
+        newlineTool.convertToSymbols();
+      } else {
+        console.error('Tool or editor not initialized');
+      }
     }
 
-    // 初始化工具
+    function copyOutput() {
+      if (newlineTool && newlineEditor) {
+        newlineTool.copyOutput();
+      }
+    }
+
+    function clearAll() {
+      if (newlineTool && newlineEditor) {
+        newlineTool.clearAll();
+      }
+    }
+
+    // 初始化
     document.addEventListener('DOMContentLoaded', function () {
-      window.newlineTool = new NewlineTool();
-
-      // 设置焦点到输入框
-      document.getElementById('inputText').focus();
-
-      // 添加键盘快捷键
-      document.addEventListener('keydown', function (e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-          e.preventDefault();
-          convertToNewlines();
-        }
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
-          e.preventDefault();
-          convertToSymbols();
-        }
-      });
+      initMonacoEditor();
     });
   </script>
 </body>

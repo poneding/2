@@ -6,16 +6,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Base64 工具 - DevTools</title>
 
+  <!-- Monaco Editor CSS -->
+  <link rel="stylesheet" data-name="vs/editor/editor.main"
+    href="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/editor/editor.main.css">
+
   <!-- 共享样式 -->
   <link rel="stylesheet" href="../css/common.css">
 
-  <!-- 页面特定样式 -->
+  <!-- Base64工具特定样式 -->
   <style>
+    .base64-tool {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .base64-controls {
+      display: flex;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) 0;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .base64-editor-container {
+      flex: 1;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--bg-tertiary);
+      min-height: 0;
+    }
+
+    .base64-editor {
+      width: 100%;
+      height: 100%;
+    }
+
     .encoding-info {
       text-align: center;
       margin: var(--spacing-md) 0;
       font-size: 14px;
       color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+      .base64-controls {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -24,19 +63,27 @@
 
   <div class="content">
     <div class="content-header">
-      <h1>Base64 工具</h1>
+      <h1>
+        <svg class="tool-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+          style="margin-right: 8px; vertical-align: middle;">
+          <rect x="3" y="5" width="7" height="14" rx="1" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5" />
+          <rect x="14" y="5" width="7" height="14" rx="1" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" />
+          <rect x="8.5" y="5" width="7" height="14" rx="1" fill="#e8f5e8" stroke="#388e3c" stroke-width="1.5" />
+          <circle cx="6.5" cy="8.5" r="1" fill="#1976d2" />
+          <circle cx="12" cy="8.5" r="1" fill="#388e3c" />
+          <circle cx="17.5" cy="8.5" r="1" fill="#7b1fa2" />
+          <path d="M10 12h4M10 15h4" stroke="#666" stroke-width="1" stroke-dasharray="2 2" />
+        </svg>
+        Base64 工具
+      </h1>
       <p>Base64 编码和解码，支持文本和二进制数据</p>
     </div>
 
     <div class="tool-page-content">
       <div class="tool-page-body">
-        <div class="tool">
-          <div class="input-group">
-            <label for="inputBase64">输入内容</label>
-            <textarea id="inputBase64" placeholder="输入要编码的文本或要解码的 Base64 编码..."></textarea>
-          </div>
-
-          <div class="button-group">
+        <div class="base64-tool">
+          <!-- 控制按钮 -->
+          <div class="base64-controls">
             <button class="btn btn-primary" onclick="encodeBase64()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="3" y="5" width="7" height="14" rx="1" stroke="currentColor" stroke-width="2" />
@@ -59,22 +106,29 @@
               </svg>
               解码
             </button>
+            <button class="btn btn-secondary" onclick="copyOutput()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" />
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2" />
+              </svg>
+              复制结果
+            </button>
             <button class="btn btn-secondary" onclick="clearAll()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path
+                  d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14zM10 11v6M14 11v6"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" />
               </svg>
               清空
             </button>
           </div>
 
-          <div class="output-group">
-            <label for="outputBase64">处理结果</label>
-            <div class="output-container">
-              <textarea id="outputBase64" class="output-textarea" placeholder="Base64 处理结果将显示在这里..." readonly></textarea>
-              <button class="copy-button" onclick="copyToClipboard('outputBase64')">复制</button>
-            </div>
+          <!-- 编辑器容器 -->
+          <div class="base64-editor-container">
+            <div id="base64Editor" class="base64-editor"></div>
           </div>
 
+          <!-- 编码信息 -->
           <div class="encoding-info" id="encodingInfo" style="display: none;">
             <span id="encodingDetails"></span>
           </div>
@@ -86,88 +140,179 @@
   <!-- 共享JavaScript -->
   <script src="../js/common.js"></script>
 
+  <!-- Monaco Editor JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+
   <!-- 页面特定JavaScript -->
   <script>
-    class Base64Tool extends ToolPage {
+    let base64Editor;
+    let base64Tool;
+
+    // 初始化Monaco Editor
+    function initMonacoEditor() {
+      require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } });
+      require(['vs/editor/editor.main'], function () {
+        // 创建Base64编辑器
+        base64Editor = monaco.editor.create(document.getElementById('base64Editor'), {
+          value: '',
+          language: 'plaintext',
+          theme: getMonacoTheme(),
+          automaticLayout: true,
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          wordWrap: 'on',
+          formatOnPaste: true,
+          suggest: {
+            showKeywords: false,
+            showSnippets: false
+          },
+          quickSuggestions: {
+            other: false,
+            comments: false,
+            strings: false
+          },
+        });
+
+        // 监听输入变化
+        base64Editor.onDidChangeModelContent(() => {
+          base64Tool.detectInputType();
+        });
+
+        // 初始化工具
+        base64Tool = new Base64Tool();
+        base64Tool.init();
+
+        // 设置焦点到编辑器
+        base64Editor.focus();
+      });
+    }
+
+    // 获取Monaco主题
+    function getMonacoTheme() {
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'vs-dark'
+        : 'vs';
+    }
+
+    class Base64Tool {
       constructor() {
-        super('base64');
         this.bindEvents();
       }
 
-      bindEvents() {
-        const inputBase64 = document.getElementById('inputBase64');
-        if (inputBase64) {
-          inputBase64.addEventListener('input', () => {
-            this.detectInputType();
+      init() {
+        // 监听主题变化
+        if (window.matchMedia) {
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            const newTheme = getMonacoTheme();
+            monaco.editor.setTheme(newTheme);
+            base64Editor.updateOptions({ theme: newTheme });
           });
         }
+
+        // 添加键盘快捷键
+        this.addKeyboardShortcuts();
+      }
+
+      addKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            this.encodeBase64();
+          }
+          if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
+            e.preventDefault();
+            this.decodeBase64();
+          }
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Delete') {
+            e.preventDefault();
+            this.clearAll();
+          }
+        });
+      }
+      bindEvents() {
+        // 事件监听已在Monaco Editor初始化时设置
       }
 
       encodeBase64() {
-        const input = document.getElementById("inputBase64").value;
-        const output = document.getElementById("outputBase64");
+        const currentText = base64Editor.getValue();
 
-        if (!input.trim()) {
+        if (!currentText.trim()) {
           this.showError('请输入要编码的内容');
           return;
         }
 
         try {
-          const encoded = btoa(unescape(encodeURIComponent(input)));
-          output.value = encoded;
-          this.showEncodingInfo(input.length, encoded.length, 'text');
+          const encoded = btoa(unescape(encodeURIComponent(currentText)));
+          base64Editor.setValue(encoded);
+          this.showEncodingInfo(currentText.length, encoded.length, 'text');
           this.showSuccess('Base64 编码成功');
         } catch (error) {
-          output.value = `编码错误: ${error.message}`;
+          base64Editor.setValue(`编码错误: ${error.message}`);
           this.showError('Base64 编码失败');
         }
       }
 
       decodeBase64() {
-        const input = document.getElementById("inputBase64").value;
+        const currentText = base64Editor.getValue();
 
-        if (!input.trim()) {
+        if (!currentText.trim()) {
           this.showError('请输入要解码的 Base64 编码');
           return;
         }
 
         try {
           // 检测是否是 data URL
-          if (input.startsWith('data:')) {
+          if (currentText.startsWith('data:')) {
             this.showError('检测到数据URL，请使用文本格式输入');
             return;
           }
 
-          const decoded = decodeURIComponent(escape(atob(input)));
-          document.getElementById("outputBase64").value = decoded;
-          this.showEncodingInfo(input.length, decoded.length, 'text');
+          const decoded = decodeURIComponent(escape(atob(currentText)));
+          base64Editor.setValue(decoded);
+          this.showEncodingInfo(currentText.length, decoded.length, 'text');
           this.showSuccess('Base64 解码成功');
         } catch (error) {
-          document.getElementById("outputBase64").value = `解码错误: 无效的 Base64 编码`;
+          base64Editor.setValue(`解码错误: 无效的 Base64 编码`);
           this.showError('Base64 解码失败，请检查输入格式');
         }
       }
 
+      copyOutput() {
+        const editorValue = base64Editor ? base64Editor.getValue() : '';
+        if (editorValue) {
+          navigator.clipboard.writeText(editorValue).then(() => {
+            if (window.showNotification) {
+              window.showNotification('已复制到剪贴板', 'success');
+            }
+          }).catch(() => {
+            if (window.showNotification) {
+              window.showNotification('复制失败', 'error');
+            }
+          });
+        }
+      }
+
       clearAll() {
-        document.getElementById("inputBase64").value = '';
-        document.getElementById("outputBase64").value = '';
+        if (base64Editor) {
+          base64Editor.setValue('');
+          base64Editor.focus();
+        }
         document.getElementById('encodingInfo').style.display = 'none';
-        this.showSuccess('已清空所有内容');
       }
 
       detectInputType() {
-        const input = document.getElementById("inputBase64").value;
-        if (!input.trim()) {
+        const currentText = base64Editor.getValue();
+        if (!currentText.trim()) {
           document.getElementById('encodingInfo').style.display = 'none';
           return;
         }
 
         // 简单检测是否是 Base64
-        const isBase64 = /^[A-Za-z0-9+/]*={0,2}$/.test(input) && input.length % 4 === 0;
+        const isBase64 = /^[A-Za-z0-9+/]*={0,2}$/.test(currentText) && currentText.length % 4 === 0;
 
         if (isBase64) {
           try {
-            atob(input);
+            atob(currentText);
             document.getElementById('encodingDetails').textContent = '检测到有效的 Base64 编码';
             document.getElementById('encodingInfo').style.display = 'block';
           } catch {
@@ -193,43 +338,42 @@
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
       }
+
+      showError(message) {
+        if (window.showNotification) {
+          window.showNotification(message, 'error');
+        } else {
+          alert(message);
+        }
+      }
+
+      showSuccess(message) {
+        if (window.showNotification) {
+          window.showNotification(message, 'success');
+        }
+      }
     }
 
     // 全局函数，供按钮调用
     function encodeBase64() {
-      window.base64Tool.encodeBase64();
+      if (base64Tool) base64Tool.encodeBase64();
     }
 
     function decodeBase64() {
-      window.base64Tool.decodeBase64();
+      if (base64Tool) base64Tool.decodeBase64();
+    }
+
+    function copyOutput() {
+      if (base64Tool) base64Tool.copyOutput();
     }
 
     function clearAll() {
-      window.base64Tool.clearAll();
+      if (base64Tool) base64Tool.clearAll();
     }
 
-    // 初始化工具
-    document.addEventListener('DOMContentLoaded', function() {
-      window.base64Tool = new Base64Tool();
-
-      // 设置焦点到输入框
-      document.getElementById('inputBase64').focus();
-
-      // 添加键盘快捷键
-      document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-          e.preventDefault();
-          encodeBase64();
-        }
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
-          e.preventDefault();
-          decodeBase64();
-        }
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Delete') {
-          e.preventDefault();
-          clearAll();
-        }
-      });
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function () {
+      initMonacoEditor();
     });
   </script>
 </body>

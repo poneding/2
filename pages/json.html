@@ -6,27 +6,110 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JSON 工具 - DevTools</title>
 
+  <!-- Monaco Editor CSS -->
+  <link rel="stylesheet" data-name="vs/editor/editor.main"
+    href="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/editor/editor.main.css">
+
   <!-- 共享样式 -->
   <link rel="stylesheet" href="../css/common.css">
+
+  <!-- JSON工具特定样式 -->
+  <style>
+    .json-tool {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .json-controls {
+      display: flex;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) 0;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .json-editor-container {
+      flex: 1;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--bg-tertiary);
+      min-height: 0;
+    }
+
+    .json-editor {
+      width: 100%;
+      height: 100%;
+    }
+
+    .json-stats {
+      display: flex;
+      gap: var(--spacing-lg);
+      padding: var(--spacing-md);
+      background: var(--surface-color);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      justify-content: center;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .json-controls {
+        flex-direction: column;
+      }
+
+      .json-stats {
+        flex-direction: column;
+        gap: var(--spacing-md);
+      }
+    }
+  </style>
 </head>
 
 <body>
-  
+
   <div class="content">
     <div class="content-header">
-      <h1>JSON 工具</h1>
+      <h1>
+        <svg class="tool-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+          style="margin-right: 8px; vertical-align: middle;">
+          <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1" />
+          <text x="4" y="9" font-size="6" fill="#dc3545" font-weight="bold">{</text>
+          <text x="8" y="12" font-size="5" fill="#6f42c1">"name"</text>
+          <text x="13" y="12" font-size="5" fill="#28a745">:</text>
+          <text x="15" y="12" font-size="5" fill="#fd7e14">"value"</text>
+          <text x="4" y="16" font-size="5" fill="#6f42c1">"count"</text>
+          <text x="11" y="16" font-size="5" fill="#28a745">:</text>
+          <text x="13" y="16" font-size="5" fill="#007bff">42</text>
+          <text x="17" y="12" font-size="5" fill="#6c757d">,</text>
+        </svg>
+        JSON 工具
+      </h1>
       <p>格式化和压缩 JSON 数据，支持验证和美化显示</p>
     </div>
 
     <div class="tool-page-content">
       <div class="tool-page-body">
-        <div class="tool">
-          <div class="input-group">
-            <label for="inputJson">输入 JSON</label>
-            <textarea id="inputJson" placeholder="输入 JSON 数据..."></textarea>
-          </div>
-
-          <div class="button-group">
+        <div class="json-tool">
+          <!-- 控制按钮 -->
+          <div class="json-controls">
             <button class="btn btn-primary" onclick="formatJson()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" stroke="currentColor" stroke-width="2" />
@@ -53,30 +136,41 @@
               </svg>
               验证
             </button>
+            <button class="btn btn-secondary" onclick="copyOutput()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" />
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2" />
+              </svg>
+              复制结果
+            </button>
+            <button class="btn btn-secondary" onclick="clearAll()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14zM10 11v6M14 11v6"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+              清空
+            </button>
           </div>
 
-          <div class="output-group">
-            <label for="outputJson">处理结果</label>
-            <div class="output-container">
-              <textarea id="outputJson" class="output-textarea" placeholder="JSON 处理结果将显示在这里..." readonly></textarea>
-              <button class="copy-button" onclick="copyToClipboard('outputJson')">复制</button>
+          <!-- 编辑器容器 -->
+          <div class="json-editor-container">
+            <div id="jsonEditor" class="json-editor"></div>
+          </div>
+
+          <!-- 统计信息 -->
+          <div class="json-stats" id="jsonStats" style="display: none;">
+            <div class="stat-item">
+              <div class="stat-value" id="jsonSize">0</div>
+              <div class="stat-label">字符数</div>
             </div>
-          </div>
-
-          <div class="tool-info" id="jsonInfo" style="display: none;">
-            <div class="tool-stats">
-              <div class="stat-item">
-                <div class="stat-value" id="jsonSize">0</div>
-                <div class="stat-label">字符数</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-value" id="jsonLines">0</div>
-                <div class="stat-label">行数</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-value" id="jsonDepth">0</div>
-                <div class="stat-label">嵌套深度</div>
-              </div>
+            <div class="stat-item">
+              <div class="stat-value" id="jsonLines">0</div>
+              <div class="stat-label">行数</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="jsonDepth">0</div>
+              <div class="stat-label">嵌套深度</div>
             </div>
           </div>
         </div>
@@ -87,26 +181,99 @@
   <!-- 共享JavaScript -->
   <script src="../js/common.js"></script>
 
+  <!-- Monaco Editor JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+
   <!-- 页面特定JavaScript -->
   <script>
-    class JsonTool extends ToolPage {
+    let jsonEditor;
+    let jsonTool;
+
+    // 初始化Monaco Editor
+    function initMonacoEditor() {
+      require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } });
+      require(['vs/editor/editor.main'], function () {
+        // 创建JSON编辑器
+        jsonEditor = monaco.editor.create(document.getElementById('jsonEditor'), {
+          value: '',
+          language: 'json',
+          theme: getMonacoTheme(),
+          automaticLayout: true,
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          wordWrap: 'on',
+          formatOnPaste: true,
+          formatOnType: true,
+          suggest: {
+            showKeywords: false,
+            showSnippets: true
+          },
+          quickSuggestions: {
+            other: true,
+            comments: false,
+            strings: true
+          }
+        });
+
+        // 监听输入变化
+        jsonEditor.onDidChangeModelContent(() => {
+          jsonTool.autoValidate();
+        });
+
+        // 初始化工具
+        jsonTool = new JsonTool();
+        jsonTool.init();
+
+        // 设置焦点到编辑器
+        jsonEditor.focus();
+      });
+    }
+
+    // 获取Monaco主题
+    function getMonacoTheme() {
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'vs-dark'
+        : 'vs';
+    }
+
+    class JsonTool {
       constructor() {
-        super('json');
-        this.bindEvents();
+        this.debounceTimer = null;
       }
 
-      bindEvents() {
-        const inputJson = document.getElementById('inputJson');
-        if (inputJson) {
-          inputJson.addEventListener('input', () => {
-            this.autoValidate();
+      init() {
+        // 监听主题变化
+        if (window.matchMedia) {
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            const newTheme = getMonacoTheme();
+            monaco.editor.setTheme(newTheme);
+            jsonEditor.updateOptions({ theme: newTheme });
           });
         }
+
+        // 添加键盘快捷键
+        this.addKeyboardShortcuts();
+      }
+
+      addKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            this.formatJson();
+          }
+          if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
+            e.preventDefault();
+            this.compressJson();
+          }
+          if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+            e.preventDefault();
+            this.validateJson();
+          }
+        });
       }
 
       formatJson() {
-        const inputJson = document.getElementById("inputJson").value;
-        const outputJson = document.getElementById("outputJson");
+        const inputJson = jsonEditor.getValue();
 
         if (!inputJson.trim()) {
           this.showError('请输入 JSON 数据');
@@ -116,19 +283,20 @@
         try {
           const parsedJson = JSON.parse(inputJson);
           const formattedJson = JSON.stringify(parsedJson, null, 2);
-          outputJson.value = formattedJson;
+
+          jsonEditor.setValue(formattedJson);
+
           this.updateStats(formattedJson);
           this.showSuccess('JSON 格式化成功');
         } catch (error) {
-          outputJson.value = `JSON 解析错误: ${error.message}`;
+          jsonEditor.setValue(`JSON 解析错误: ${error.message}`);
           this.showError('JSON 格式无效，请检查语法');
           this.hideStats();
         }
       }
 
       compressJson() {
-        const inputJson = document.getElementById("inputJson").value;
-        const outputJson = document.getElementById("outputJson");
+        const inputJson = jsonEditor.getValue();
 
         if (!inputJson.trim()) {
           this.showError('请输入 JSON 数据');
@@ -138,19 +306,20 @@
         try {
           const parsedJson = JSON.parse(inputJson);
           const compressedJson = JSON.stringify(parsedJson);
-          outputJson.value = compressedJson;
+
+          jsonEditor.setValue(compressedJson);
+
           this.updateStats(compressedJson);
           this.showSuccess('JSON 压缩成功');
         } catch (error) {
-          outputJson.value = `JSON 解析错误: ${error.message}`;
+          jsonEditor.setValue(`JSON 解析错误: ${error.message}`);
           this.showError('JSON 格式无效，请检查语法');
           this.hideStats();
         }
       }
 
       validateJson() {
-        const inputJson = document.getElementById("inputJson").value;
-        const outputJson = document.getElementById("outputJson");
+        const inputJson = jsonEditor.getValue();
 
         if (!inputJson.trim()) {
           this.showError('请输入 JSON 数据');
@@ -159,48 +328,53 @@
 
         try {
           const parsedJson = JSON.parse(inputJson);
-          outputJson.value = JSON.stringify(parsedJson, null, 2);
-          this.updateStats(outputJson.value);
+          const formattedJson = JSON.stringify(parsedJson, null, 2);
+
+          jsonEditor.setValue(formattedJson);
+
+          this.updateStats(formattedJson);
           this.showSuccess('JSON 格式验证通过');
         } catch (error) {
-          outputJson.value = `JSON 验证失败: ${error.message}`;
+          jsonEditor.setValue(`JSON 验证失败: ${error.message}`);
           this.showError('JSON 格式无效');
           this.hideStats();
         }
       }
 
       autoValidate() {
-        const inputJson = document.getElementById("inputJson").value;
-        if (!inputJson.trim()) {
-          this.hideStats();
-          return;
-        }
+        // 防抖处理
+        clearTimeout(this.debounceTimer);
+        this.debounceTimer = setTimeout(() => {
+          const inputJson = jsonEditor.getValue();
+          if (!inputJson.trim()) {
+            this.hideStats();
+            return;
+          }
 
-        try {
-          JSON.parse(inputJson);
-          // 简单验证通过，不显示详细信息
-          document.getElementById('jsonInfo').style.display = 'block';
-          document.getElementById('jsonSize').textContent = inputJson.length;
-          document.getElementById('jsonLines').textContent = inputJson.split('\n').length;
-          document.getElementById('jsonDepth').textContent = '?'; // 需要更复杂的计算
-        } catch (error) {
-          this.hideStats();
-        }
+          try {
+            JSON.parse(inputJson);
+            // JSON格式正确，无需显示状态
+          } catch (error) {
+            this.hideStats();
+          }
+        }, 300);
       }
 
       updateStats(jsonString) {
         const lines = jsonString.split('\n').length;
         const depth = this.calculateDepth(JSON.parse(jsonString));
 
-        document.getElementById('jsonInfo').style.display = 'block';
+        document.getElementById('jsonStats').style.display = 'flex';
         document.getElementById('jsonSize').textContent = jsonString.length;
         document.getElementById('jsonLines').textContent = lines;
         document.getElementById('jsonDepth').textContent = depth;
       }
 
       hideStats() {
-        document.getElementById('jsonInfo').style.display = 'none';
+        document.getElementById('jsonStats').style.display = 'none';
       }
+
+      // 状态更新方法已移除，因为不再有状态显示元素
 
       calculateDepth(obj, currentDepth = 0) {
         if (typeof obj !== 'object' || obj === null) {
@@ -216,43 +390,65 @@
         }
         return maxDepth;
       }
+
+      showError(message) {
+        // 使用共享的显示错误方法
+        if (window.showNotification) {
+          window.showNotification(message, 'error');
+        } else {
+          alert(message);
+        }
+      }
+
+      showSuccess(message) {
+        // 使用共享的显示成功方法
+        if (window.showNotification) {
+          window.showNotification(message, 'success');
+        }
+      }
     }
 
     // 全局函数，供按钮调用
     function formatJson() {
-      window.jsonTool.formatJson();
+      if (jsonTool) jsonTool.formatJson();
     }
 
     function compressJson() {
-      window.jsonTool.compressJson();
+      if (jsonTool) jsonTool.compressJson();
     }
 
     function validateJson() {
-      window.jsonTool.validateJson();
+      if (jsonTool) jsonTool.validateJson();
     }
 
-    // 初始化工具
+    function copyOutput() {
+      const editorValue = jsonEditor ? jsonEditor.getValue() : '';
+      if (editorValue) {
+        navigator.clipboard.writeText(editorValue).then(() => {
+          if (window.showNotification) {
+            window.showNotification('已复制到剪贴板', 'success');
+          }
+        }).catch(() => {
+          if (window.showNotification) {
+            window.showNotification('复制失败', 'error');
+          }
+        });
+      }
+    }
+
+    function clearAll() {
+      if (jsonEditor) {
+        jsonEditor.setValue('');
+        jsonEditor.focus();
+      }
+      if (jsonTool) {
+        jsonTool.hideStats();
+      }
+    }
+
+    // 初始化
     document.addEventListener('DOMContentLoaded', function () {
-      window.jsonTool = new JsonTool();
-
-      // 设置焦点到输入框
-      document.getElementById('inputJson').focus();
-
-      // 添加键盘快捷键
-      document.addEventListener('keydown', function (e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-          e.preventDefault();
-          formatJson();
-        }
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
-          e.preventDefault();
-          compressJson();
-        }
-        if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
-          e.preventDefault();
-          validateJson();
-        }
-      });
+      initMonacoEditor();
     });
   </script>
 </body>

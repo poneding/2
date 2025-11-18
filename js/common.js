@@ -226,19 +226,13 @@ function createSidebar() {
   sidebar.className = 'sidebar';
 
   // 构建菜单HTML
-  const navItems = [
-    {
-      href: '../index.html',
-      icon: `<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />`,
-      label: '首页'
-    }
-  ];
+  const navItems = [];
 
   // 添加工具到菜单
   Object.entries(tools).forEach(([key, tool]) => {
     let icon = '';
 
-    switch(key) {
+    switch (key) {
       case 'newline':
         icon = `
           <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1" />
@@ -359,7 +353,7 @@ function initializeSidebar() {
 }
 
 // DOM 加载完成后的初始化
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   // 初始化侧边栏（如果在工具页面）
   if (!window.location.pathname.endsWith('index.html') && window.location.pathname !== '/') {
     initializeSidebar();
@@ -369,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setActiveNavigation();
 
   // 添加键盘快捷键
-  document.addEventListener('keydown', function(e) {
+  document.addEventListener('keydown', function (e) {
     // Ctrl/Cmd + K 快速搜索 (未来功能)
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault();
