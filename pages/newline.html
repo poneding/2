@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>换行工具 - DevTools</title>
+
+  <!-- 共享样式 -->
+  <link rel="stylesheet" href="../css/common.css">
+</head>
+
+<body>
+  
+  <div class="content">
+    <div class="content-header">
+      <h1>换行工具</h1>
+      <p>在文本换行符和转义序列之间进行转换</p>
+    </div>
+
+    <div class="tool-page-content">
+      <div class="tool-page-body">
+
+        <div class="tool">
+          <div class="input-group">
+            <label for="inputText">输入文本</label>
+            <textarea id="inputText" placeholder="输入包含换行符或 \n 转义序列的文本..."></textarea>
+          </div>
+
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="convertToNewlines()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 7h10M7 12h10M7 17h7M4 7v10M14 17v-4" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              转成多行
+            </button>
+            <button class="btn btn-secondary" onclick="convertToSymbols()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 7h10M7 12h10M7 17h10M4 7v10M20 17v-4" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M15 17c0-2.2-1.8-4-4-4s-4 1.8-4 4" stroke="currentColor" stroke-width="1.5"
+                  stroke-dasharray="2 2" />
+              </svg>
+              转成单行
+            </button>
+          </div>
+
+          <div class="output-group">
+            <label for="outputText">转换结果</label>
+            <div class="output-container">
+              <textarea id="outputText" class="output-textarea" placeholder="转换结果将显示在这里..." readonly></textarea>
+              <button class="copy-button" onclick="copyToClipboard('outputText')">复制</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 共享JavaScript -->
+  <script src="../js/common.js"></script>
+
+  <!-- 页面特定JavaScript -->
+  <script>
+    class NewlineTool extends ToolPage {
+      constructor() {
+        super('newline');
+        this.bindEvents();
+      }
+
+      bindEvents() {
+        // 绑定输入变化事件（可选：实时转换）
+        const inputText = document.getElementById('inputText');
+        if (inputText) {
+          inputText.addEventListener('input', () => {
+            // 可选：启用实时转换
+            // this.autoConvert();
+          });
+        }
+      }
+
+      convertToNewlines() {
+        const inputText = document.getElementById("inputText").value;
+        const outputText = document.getElementById("outputText");
+
+        if (!inputText.trim()) {
+          this.showError('请输入要转换的文本');
+          return;
+        }
+
+        try {
+          const convertedText = inputText.replace(/\\n/g, "\n");
+          outputText.value = convertedText;
+          this.showSuccess('已转换为多行格式');
+        } catch (error) {
+          outputText.value = `转换错误: ${error.message}`;
+          this.showError('转换失败，请检查输入格式');
+        }
+      }
+
+      convertToSymbols() {
+        const inputText = document.getElementById("inputText").value;
+        const outputText = document.getElementById("outputText");
+
+        if (!inputText.trim()) {
+          this.showError('请输入要转换的文本');
+          return;
+        }
+
+        try {
+          const convertedText = inputText.replace(/\n/g, "\\n");
+          outputText.value = convertedText;
+          this.showSuccess('已转换为单行格式');
+        } catch (error) {
+          outputText.value = `转换错误: ${error.message}`;
+          this.showError('转换失败，请检查输入格式');
+        }
+      }
+
+      autoConvert() {
+        // 自动检测并转换（可选功能）
+        const inputText = document.getElementById("inputText").value;
+        if (inputText.includes('\\n')) {
+          this.convertToNewlines();
+        } else if (inputText.includes('\n')) {
+          this.convertToSymbols();
+        }
+      }
+    }
+
+    // 全局函数，供按钮调用
+    function convertToNewlines() {
+      window.newlineTool.convertToNewlines();
+    }
+
+    function convertToSymbols() {
+      window.newlineTool.convertToSymbols();
+    }
+
+    // 初始化工具
+    document.addEventListener('DOMContentLoaded', function () {
+      window.newlineTool = new NewlineTool();
+
+      // 设置焦点到输入框
+      document.getElementById('inputText').focus();
+
+      // 添加键盘快捷键
+      document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          convertToNewlines();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
+          e.preventDefault();
+          convertToSymbols();
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

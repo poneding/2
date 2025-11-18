@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文本对比 - DevTools</title>
+
+  <!-- Monaco Editor CSS -->
+  <link rel="stylesheet" data-name="vs/editor/editor.main"
+    href="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/editor/editor.main.css">
+
+  <!-- 共享样式 -->
+  <link rel="stylesheet" href="../css/common.css">
+</head>
+
+<body>
+
+  <div class="content">
+    <div class="content-header">
+      <h1>文本对比</h1>
+      <p>实时文本差异比较工具，支持直接编辑和语法高亮</p>
+    </div>
+
+    <div class="tool-page-content">
+      <div class="tool-page-body">
+        <div class="diff-tool">
+          <div class="diff-container">
+            <div id="diffEditor" class="diff-editor">
+              <div class="loading">正在加载编辑器</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 共享JavaScript -->
+      <script src="../js/common.js"></script>
+
+      <!-- 页面特定JavaScript -->
+      <script>
+        class DiffTool extends ToolPage {
+          constructor() {
+            super('diff');
+            this.diffEditor = null;
+            this.isSideBySide = true;
+            this.init();
+          }
+
+          async init() {
+            try {
+              await this.loadMonaco();
+              this.initDiffEditor();
+              this.bindEvents();
+              this.updateStatus('编辑器已加载 - 可以开始比较文本');
+            } catch (error) {
+              this.updateStatus('编辑器加载失败: ' + error.message);
+              this.showError('编辑器加载失败');
+            }
+          }
+
+          async loadMonaco() {
+            return new Promise((resolve, reject) => {
+              if (window.monaco) {
+                resolve();
+                return;
+              }
+
+              const script = document.createElement('script');
+              script.src = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js';
+              script.onload = () => {
+                require.config({
+                  paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' }
+                });
+                require(['vs/editor/editor.main'], () => {
+                  resolve();
+                });
+              };
+              script.onerror = reject;
+              document.head.appendChild(script);
+            });
+          }
+
+          initDiffEditor() {
+            const container = document.getElementById('diffEditor');
+            const theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'vs-dark' : 'vs';
+
+            // 清空容器
+            container.innerHTML = '';
+
+            // 初始化Diff编辑器
+            this.diffEditor = monaco.editor.createDiffEditor(container, {
+              theme: theme,
+              automaticLayout: true,
+              renderSideBySide: this.isSideBySide,
+              readOnly: false,
+              enableSplitViewResizing: true,
+              renderOverviewRuler: true,
+              diffAlgorithm: 'smart',
+              renderMarginRevertIcon: true,
+              ignoreTrimWhitespace: false,
+              renderWhitespace: 'selection',
+              scrollBeyondLastLine: false,
+              minimap: { enabled: false },
+              fontSize: 14,
+              lineNumbers: 'on',
+              roundedSelection: false,
+              originalEditable: true,
+              modifiedEditable: true,
+              semanticHighlighting: false,
+              fontFamily: 'Cascadia Mono,Consolas, Menlo, Monaco, Ubuntu Mono, monospace',
+            });
+
+            // 设置初始内容
+            this.loadSampleData();
+
+            // 监听模型变化
+            // this.diffEditor.onDidUpdateDiff(() => {
+            //   this.updateDiffStatus();
+            // });
+
+            // 监听主题变化
+            if (window.matchMedia) {
+              window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                const newTheme = e.matches ? 'vs-dark' : 'vs';
+                if (this.diffEditor) {
+                  monaco.editor.setTheme(newTheme);
+                }
+              });
+            }
+          }
+
+          bindEvents() {
+            // 监听键盘快捷键
+            document.addEventListener('keydown', (e) => {
+              if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                this.setRenderSideBySide(!this.isSideBySide);
+              }
+              if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+                e.preventDefault();
+                this.loadSampleData();
+              }
+              if ((e.ctrlKey || e.metaKey) && e.key === 'Delete') {
+                e.preventDefault();
+                this.clearDiff();
+              }
+            });
+          }
+
+          setRenderSideBySide(sideBySide) {
+            this.isSideBySide = sideBySide;
+
+            if (this.diffEditor) {
+              this.diffEditor.updateOptions({
+                renderSideBySide: sideBySide
+              });
+            }
+
+            // 更新按钮状态
+            document.getElementById('sideBySideBtn').classList.toggle('active', sideBySide);
+            document.getElementById('unifiedBtn').classList.toggle('active', !sideBySide);
+
+            this.updateStatus(sideBySide ? '已切换到并排对比模式' : '已切换到统一视图模式');
+          }
+
+          loadSampleData() {
+            if (!this.diffEditor) {
+              this.showError('编辑器尚未加载完成');
+              return;
+            }
+
+            const originalText = `// 原始版本 - 计算斐波那契数列
+function fibonacci(n) {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+// 使用示例
+console.log(fibonacci(10)); // 输出: 55
+
+// 性能测试
+const start = Date.now();
+fibonacci(30);
+const end = Date.now();
+console.log(\`执行时间: \${end - start}ms\`);`;
+
+            const modifiedText = `// 修改版本 - 计算斐波那契数列（带缓存优化）
+function fibonacci(n, memo = {}) {
+  if (n <= 1) return n;
+
+  // 检查缓存
+  if (memo[n] !== undefined) {
+    return memo[n];
+  }
+
+  // 计算并缓存结果
+  memo[n] = fibonacci(n - 1, memo) + fibonacci(n - 2, memo);
+  return memo[n];
+}
+
+// 使用示例
+console.log(fibonacci(10)); // 输出: 55
+
+// 性能测试
+const start = Date.now();
+fibonacci(100); // 现在可以计算更大的数字
+const end = Date.now();
+console.log(\`执行时间: \${end - start}ms\`);
+
+// 添加新功能
+function fibonacciSeries(limit) {
+  const series = [];
+  for (let i = 0; i <= limit; i++) {
+    series.push(fibonacci(i));
+  }
+  return series;
+}`;
+
+            const language = this.detectLanguage(originalText, modifiedText);
+            const originalModel = monaco.editor.createModel(originalText, language);
+            const modifiedModel = monaco.editor.createModel(modifiedText, language);
+
+            this.diffEditor.setModel({
+              original: originalModel,
+              modified: modifiedModel
+            });
+
+            this.updateStatus('已加载示例数据 - 查看代码差异和性能优化');
+          }
+
+          clearDiff() {
+            if (!this.diffEditor) {
+              this.showError('编辑器尚未加载完成');
+              return;
+            }
+
+            const emptyText = '';
+            const emptyModel = monaco.editor.createModel(emptyText, 'plaintext');
+
+            this.diffEditor.setModel({
+              original: emptyModel,
+              modified: emptyModel
+            });
+
+            this.updateStatus('已清空所有内容');
+          }
+
+          detectLanguage(text1, text2) {
+            const combinedText = text1 + '\n' + text2;
+
+            // 检测JavaScript
+            if (combinedText.includes('function') || combinedText.includes('const ') ||
+              combinedText.includes('let ') || combinedText.includes('=>')) {
+              return 'javascript';
+            }
+
+            // 检测JSON
+            try {
+              JSON.parse(text1);
+              return 'json';
+            } catch {
+              try {
+                JSON.parse(text2);
+                return 'json';
+              } catch {
+                // 不是JSON
+              }
+            }
+
+            // 检测HTML
+            if (combinedText.includes('<') && combinedText.includes('>') && combinedText.includes('</')) {
+              return 'html';
+            }
+
+            // 检测CSS
+            if (combinedText.includes('{') && combinedText.includes(':') && combinedText.includes(';')) {
+              return 'css';
+            }
+
+            // 检测Python
+            if (combinedText.includes('def ') || combinedText.includes('import ') ||
+              combinedText.includes('print(') || combinedText.includes('#')) {
+              return 'python';
+            }
+
+            // 默认为纯文本
+            return 'plaintext';
+          }
+        }
+
+        // 全局函数，供按钮调用
+        function setRenderSideBySide(sideBySide) {
+          if (window.diffTool) {
+            window.diffTool.setRenderSideBySide(sideBySide);
+          }
+        }
+
+        function loadSampleData() {
+          if (window.diffTool) {
+            window.diffTool.loadSampleData();
+          }
+        }
+
+        function clearDiff() {
+          if (window.diffTool) {
+            window.diffTool.clearDiff();
+          }
+        }
+
+        // 初始化工具
+        document.addEventListener('DOMContentLoaded', function () {
+          window.diffTool = new DiffTool();
+        });
+      </script>
+</body>
+
+</html>

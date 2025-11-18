@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# 批量更新页面模板
+
+# 创建通用侧边栏模板
+cat > /tmp/sidebar_content.html << 'SIDEBAR_EOF'
+<!-- GitHub 链接 -->
+  <a href="https://github.com/poneding/2" target="_blank" rel="noopener noreferrer" class="github-link">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+        fill="currentColor" />
+    </svg>
+  </a>
+
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2 onclick="location.href='../index.html'" style="cursor: pointer;">
+        <svg class="logo" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"
+            fill="currentColor" />
+          <path d="M14 2l-1 1 8 8 1-1-8-8zM6 14l-1 1 8 8 1-1-8-8z" fill="currentColor" opacity="0.7" />
+        </svg>
+        <span>DevTools</span>
+      </h2>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="../index.html" class="nav-button nav-link">
+        <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>首页</span>
+      </a>
+
+      <a href="newline.html" class="nav-button nav-link">
+        <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1"/>
+          <rect x="5" y="7" width="8" height="2" rx="1" fill="#495057"/>
+          <rect x="14" y="7" width="5" height="2" rx="1" fill="#495057"/>
+          <rect x="5" y="11" width="10" height="2" rx="1" fill="#495057"/>
+          <path d="M16 12h2v-1h-1v-1h-1v2z" fill="#28a745"/>
+          <text x="17" y="12" font-size="8" fill="#28a745" font-weight="bold">↵</text>
+          <rect x="5" y="15" width="14" height="2" rx="1" fill="#495057"/>
+        </svg>
+        <span>换行工具</span>
+      </a>
+
+      <a href="json.html" class="nav-button nav-link">
+        <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1"/>
+          <text x="4" y="9" font-size="6" fill="#dc3545" font-weight="bold">{</text>
+          <text x="8" y="12" font-size="5" fill="#6f42c1">"name"</text>
+          <text x="13" y="12" font-size="5" fill="#28a745">:</text>
+          <text x="15" y="12" font-size="5" fill="#fd7e14">"value"</text>
+          <text x="4" y="16" font-size="5" fill="#6f42c1">"count"</text>
+          <text x="11" y="16" font-size="5" fill="#28a745">:</text>
+          <text x="13" y="16" font-size="5" fill="#007bff">42</text>
+          <text x="17" y="12" font-size="5" fill="#6c757d">,</text>
+        </svg>
+        <span>JSON 工具</span>
+      </a>
+
+      <a href="base64.html" class="nav-button nav-link">
+        <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="5" width="7" height="14" rx="1" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5"/>
+          <rect x="14" y="5" width="7" height="14" rx="1" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5"/>
+          <rect x="8.5" y="5" width="7" height="14" rx="1" fill="#e8f5e8" stroke="#388e3c" stroke-width="1.5"/>
+          <circle cx="6.5" cy="8.5" r="1" fill="#1976d2"/>
+          <circle cx="12" cy="8.5" r="1" fill="#388e3c"/>
+          <circle cx="17.5" cy="8.5" r="1" fill="#7b1fa2"/>
+          <path d="M10 12h4M10 15h4" stroke="#666" stroke-width="1" stroke-dasharray="2 2"/>
+        </svg>
+        <span>Base64 工具</span>
+      </a>
+
+      <a href="url.html" class="nav-button nav-link">
+        <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.71 1.71" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="1" fill="currentColor"/>
+        </svg>
+        <span>URL 工具</span>
+      </a>
+
+      <a href="diff.html" class="nav-button nav-link">
+        <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="4" width="18" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1"/>
+          <path d="M6 8h4M6 11h2M14 8h4M14 11h2M6 14h6M12 14h6" stroke="#dc3545" stroke-width="2"
+            stroke-linecap="round"/>
+          <path d="M6 17h12" stroke="#28a745" stroke-width="2" stroke-linecap="round"/>
+          <text x="7" y="16" font-size="6" fill="#dc3545" font-weight="bold">-</text>
+          <text x="15" y="16" font-size="6" fill="#28a745" font-weight="bold">+</text>
+        </svg>
+        <span>文本对比</span>
+      </a>
+    </nav>
+  </div>
+SIDEBAR_EOF
+
+echo "侧边栏模板已创建"

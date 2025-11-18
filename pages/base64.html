@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base64 工具 - DevTools</title>
+
+  <!-- 共享样式 -->
+  <link rel="stylesheet" href="../css/common.css">
+
+  <!-- 页面特定样式 -->
+  <style>
+    .encoding-info {
+      text-align: center;
+      margin: var(--spacing-md) 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="content">
+    <div class="content-header">
+      <h1>Base64 工具</h1>
+      <p>Base64 编码和解码，支持文本和二进制数据</p>
+    </div>
+
+    <div class="tool-page-content">
+      <div class="tool-page-body">
+        <div class="tool">
+          <div class="input-group">
+            <label for="inputBase64">输入内容</label>
+            <textarea id="inputBase64" placeholder="输入要编码的文本或要解码的 Base64 编码..."></textarea>
+          </div>
+
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="encodeBase64()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="5" width="7" height="14" rx="1" stroke="currentColor" stroke-width="2" />
+                <rect x="14" y="5" width="7" height="14" rx="1" stroke="currentColor" stroke-width="2" />
+                <path d="M10 10h4M10 14h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <circle cx="6.5" cy="8.5" r="1" fill="currentColor" />
+                <circle cx="17.5" cy="8.5" r="1" fill="currentColor" />
+              </svg>
+              编码
+            </button>
+            <button class="btn btn-secondary" onclick="decodeBase64()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="14" y="5" width="7" height="14" rx="1" stroke="currentColor" stroke-width="2" />
+                <rect x="3" y="5" width="7" height="14" rx="1" stroke="currentColor" stroke-width="2" />
+                <path d="M10 10h4M10 14h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-dasharray="2 2" />
+                <circle cx="17.5" cy="8.5" r="1" fill="currentColor" />
+                <circle cx="6.5" cy="8.5" r="1" fill="currentColor" />
+                <path d="M12 7v10" stroke="currentColor" stroke-width="1" stroke-dasharray="1 2" opacity="0.6" />
+              </svg>
+              解码
+            </button>
+            <button class="btn btn-secondary" onclick="clearAll()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              清空
+            </button>
+          </div>
+
+          <div class="output-group">
+            <label for="outputBase64">处理结果</label>
+            <div class="output-container">
+              <textarea id="outputBase64" class="output-textarea" placeholder="Base64 处理结果将显示在这里..." readonly></textarea>
+              <button class="copy-button" onclick="copyToClipboard('outputBase64')">复制</button>
+            </div>
+          </div>
+
+          <div class="encoding-info" id="encodingInfo" style="display: none;">
+            <span id="encodingDetails"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 共享JavaScript -->
+  <script src="../js/common.js"></script>
+
+  <!-- 页面特定JavaScript -->
+  <script>
+    class Base64Tool extends ToolPage {
+      constructor() {
+        super('base64');
+        this.bindEvents();
+      }
+
+      bindEvents() {
+        const inputBase64 = document.getElementById('inputBase64');
+        if (inputBase64) {
+          inputBase64.addEventListener('input', () => {
+            this.detectInputType();
+          });
+        }
+      }
+
+      encodeBase64() {
+        const input = document.getElementById("inputBase64").value;
+        const output = document.getElementById("outputBase64");
+
+        if (!input.trim()) {
+          this.showError('请输入要编码的内容');
+          return;
+        }
+
+        try {
+          const encoded = btoa(unescape(encodeURIComponent(input)));
+          output.value = encoded;
+          this.showEncodingInfo(input.length, encoded.length, 'text');
+          this.showSuccess('Base64 编码成功');
+        } catch (error) {
+          output.value = `编码错误: ${error.message}`;
+          this.showError('Base64 编码失败');
+        }
+      }
+
+      decodeBase64() {
+        const input = document.getElementById("inputBase64").value;
+
+        if (!input.trim()) {
+          this.showError('请输入要解码的 Base64 编码');
+          return;
+        }
+
+        try {
+          // 检测是否是 data URL
+          if (input.startsWith('data:')) {
+            this.showError('检测到数据URL，请使用文本格式输入');
+            return;
+          }
+
+          const decoded = decodeURIComponent(escape(atob(input)));
+          document.getElementById("outputBase64").value = decoded;
+          this.showEncodingInfo(input.length, decoded.length, 'text');
+          this.showSuccess('Base64 解码成功');
+        } catch (error) {
+          document.getElementById("outputBase64").value = `解码错误: 无效的 Base64 编码`;
+          this.showError('Base64 解码失败，请检查输入格式');
+        }
+      }
+
+      clearAll() {
+        document.getElementById("inputBase64").value = '';
+        document.getElementById("outputBase64").value = '';
+        document.getElementById('encodingInfo').style.display = 'none';
+        this.showSuccess('已清空所有内容');
+      }
+
+      detectInputType() {
+        const input = document.getElementById("inputBase64").value;
+        if (!input.trim()) {
+          document.getElementById('encodingInfo').style.display = 'none';
+          return;
+        }
+
+        // 简单检测是否是 Base64
+        const isBase64 = /^[A-Za-z0-9+/]*={0,2}$/.test(input) && input.length % 4 === 0;
+
+        if (isBase64) {
+          try {
+            atob(input);
+            document.getElementById('encodingDetails').textContent = '检测到有效的 Base64 编码';
+            document.getElementById('encodingInfo').style.display = 'block';
+          } catch {
+            document.getElementById('encodingInfo').style.display = 'none';
+          }
+        } else {
+          document.getElementById('encodingInfo').style.display = 'none';
+        }
+      }
+
+      showEncodingInfo(inputSize, outputSize, type) {
+        const info = document.getElementById('encodingDetails');
+        if (type === 'text') {
+          info.textContent = `原始: ${this.formatFileSize(inputSize)} | 编码后: ${this.formatFileSize(outputSize)} | 压缩比: ${((outputSize / inputSize) * 100).toFixed(1)}%`;
+        }
+        document.getElementById('encodingInfo').style.display = 'block';
+      }
+
+      formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      }
+    }
+
+    // 全局函数，供按钮调用
+    function encodeBase64() {
+      window.base64Tool.encodeBase64();
+    }
+
+    function decodeBase64() {
+      window.base64Tool.decodeBase64();
+    }
+
+    function clearAll() {
+      window.base64Tool.clearAll();
+    }
+
+    // 初始化工具
+    document.addEventListener('DOMContentLoaded', function() {
+      window.base64Tool = new Base64Tool();
+
+      // 设置焦点到输入框
+      document.getElementById('inputBase64').focus();
+
+      // 添加键盘快捷键
+      document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          encodeBase64();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
+          e.preventDefault();
+          decodeBase64();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Delete') {
+          e.preventDefault();
+          clearAll();
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

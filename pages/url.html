@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL 工具 - DevTools</title>
+
+  <!-- 共享样式 -->
+  <link rel="stylesheet" href="../css/common.css">
+</head>
+
+<body>
+
+  <div class="content">
+    <div class="content-header">
+      <h1>URL 工具</h1>
+      <p>URL 编码和解码，处理特殊字符和查询参数</p>
+    </div>
+
+    <div class="tool-page-content">
+      <div class="tool-page-body">
+        <div class="tool">
+          <div class="input-group">
+            <label for="inputUrl">输入 URL</label>
+            <textarea id="inputUrl" placeholder="输入要编码或解码的 URL/文本..."></textarea>
+          </div>
+
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="encodeUrl()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 9h6a4 4 0 0 1 0 8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <path d="M18 15h-6a4 4 0 0 1 0-8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <circle cx="12" cy="13" r="1" fill="currentColor" />
+                <circle cx="12" cy="9" r="1" fill="currentColor" />
+              </svg>
+              编码
+            </button>
+            <button class="btn btn-secondary" onclick="decodeUrl()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 15h6a4 4 0 0 0 0-8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <path d="M18 9h-6a4 4 0 0 0 0 8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <circle cx="12" cy="13" r="1" fill="currentColor" />
+                <circle cx="12" cy="9" r="1" fill="currentColor" />
+                <path d="M8 12h8" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2" opacity="0.6" />
+              </svg>
+              解码
+            </button>
+            <button class="btn btn-secondary" onclick="clearUrl()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              清空
+            </button>
+          </div>
+
+          <div class="output-group">
+            <label for="outputUrl">处理结果</label>
+            <div class="output-container">
+              <textarea id="outputUrl" class="output-textarea" placeholder="URL 处理结果将显示在这里..." readonly></textarea>
+              <button class="copy-button" onclick="copyToClipboard('outputUrl')">复制</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 共享JavaScript -->
+  <script src="../js/common.js"></script>
+
+  <!-- 页面特定JavaScript -->
+  <script>
+    class UrlTool extends ToolPage {
+      constructor() {
+        super('url');
+        this.bindEvents();
+      }
+
+      bindEvents() {
+        // 简化的事件绑定，不再需要URL类型检测
+      }
+
+      encodeUrl() {
+        const input = document.getElementById("inputUrl").value;
+        const output = document.getElementById("outputUrl");
+
+        if (!input.trim()) {
+          this.showError('请输入要编码的内容');
+          return;
+        }
+
+        try {
+          // 使用encodeURIComponent作为默认编码方式，更通用
+          const encoded = encodeURIComponent(input);
+          output.value = encoded;
+          this.showSuccess('URL 编码成功');
+        } catch (error) {
+          output.value = `编码错误: ${error.message}`;
+          this.showError('URL 编码失败');
+        }
+      }
+
+      decodeUrl() {
+        const input = document.getElementById("inputUrl").value;
+        const output = document.getElementById("outputUrl");
+
+        if (!input.trim()) {
+          this.showError('请输入要解码的 URL 编码');
+          return;
+        }
+
+        try {
+          const decoded = decodeURIComponent(input);
+          output.value = decoded;
+          this.showSuccess('URL 解码成功');
+        } catch (error) {
+          output.value = `解码错误: 无效的 URL 编码`;
+          this.showError('URL 解码失败，请检查输入格式');
+        }
+      }
+
+    
+      clearUrl() {
+        document.getElementById("inputUrl").value = '';
+        document.getElementById("outputUrl").value = '';
+        this.showSuccess('已清空所有内容');
+      }
+    }
+
+    // 全局函数，供按钮调用
+    function encodeUrl() {
+      window.urlTool.encodeUrl();
+    }
+
+    function decodeUrl() {
+      window.urlTool.decodeUrl();
+    }
+
+    
+    function clearUrl() {
+      window.urlTool.clearUrl();
+    }
+
+    // 初始化工具
+    document.addEventListener('DOMContentLoaded', function() {
+      window.urlTool = new UrlTool();
+
+      // 设置焦点到输入框
+      document.getElementById('inputUrl').focus();
+
+      // 添加键盘快捷键
+      document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          encodeUrl();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
+          e.preventDefault();
+          decodeUrl();
+        }
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Delete') {
+          e.preventDefault();
+          clearUrl();
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

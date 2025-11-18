@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON 工具 - DevTools</title>
+
+  <!-- 共享样式 -->
+  <link rel="stylesheet" href="../css/common.css">
+</head>
+
+<body>
+  
+  <div class="content">
+    <div class="content-header">
+      <h1>JSON 工具</h1>
+      <p>格式化和压缩 JSON 数据，支持验证和美化显示</p>
+    </div>
+
+    <div class="tool-page-content">
+      <div class="tool-page-body">
+        <div class="tool">
+          <div class="input-group">
+            <label for="inputJson">输入 JSON</label>
+            <textarea id="inputJson" placeholder="输入 JSON 数据..."></textarea>
+          </div>
+
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="formatJson()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" stroke="currentColor" stroke-width="2" />
+                <path d="M14 14h6v6h-6zM7 7h2M7 12h2M7 17h2M17 7h2M17 12h2M17 17h2" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" />
+                <path d="M12 7v2M12 12v2M12 17v2" stroke="currentColor" stroke-width="1" opacity="0.6" />
+              </svg>
+              格式化
+            </button>
+            <button class="btn btn-secondary" onclick="compressJson()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4" y="6" width="16" height="4" rx="1" stroke="currentColor" stroke-width="2" />
+                <rect x="4" y="12" width="12" height="2" rx="1" stroke="currentColor" stroke-width="2" />
+                <rect x="4" y="16" width="14" height="2" rx="1" stroke="currentColor" stroke-width="2" />
+                <path d="M20 8v8M4 14v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+              压缩
+            </button>
+            <button class="btn btn-secondary" onclick="validateJson()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 11l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+              </svg>
+              验证
+            </button>
+          </div>
+
+          <div class="output-group">
+            <label for="outputJson">处理结果</label>
+            <div class="output-container">
+              <textarea id="outputJson" class="output-textarea" placeholder="JSON 处理结果将显示在这里..." readonly></textarea>
+              <button class="copy-button" onclick="copyToClipboard('outputJson')">复制</button>
+            </div>
+          </div>
+
+          <div class="tool-info" id="jsonInfo" style="display: none;">
+            <div class="tool-stats">
+              <div class="stat-item">
+                <div class="stat-value" id="jsonSize">0</div>
+                <div class="stat-label">字符数</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="jsonLines">0</div>
+                <div class="stat-label">行数</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="jsonDepth">0</div>
+                <div class="stat-label">嵌套深度</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 共享JavaScript -->
+  <script src="../js/common.js"></script>
+
+  <!-- 页面特定JavaScript -->
+  <script>
+    class JsonTool extends ToolPage {
+      constructor() {
+        super('json');
+        this.bindEvents();
+      }
+
+      bindEvents() {
+        const inputJson = document.getElementById('inputJson');
+        if (inputJson) {
+          inputJson.addEventListener('input', () => {
+            this.autoValidate();
+          });
+        }
+      }
+
+      formatJson() {
+        const inputJson = document.getElementById("inputJson").value;
+        const outputJson = document.getElementById("outputJson");
+
+        if (!inputJson.trim()) {
+          this.showError('请输入 JSON 数据');
+          return;
+        }
+
+        try {
+          const parsedJson = JSON.parse(inputJson);
+          const formattedJson = JSON.stringify(parsedJson, null, 2);
+          outputJson.value = formattedJson;
+          this.updateStats(formattedJson);
+          this.showSuccess('JSON 格式化成功');
+        } catch (error) {
+          outputJson.value = `JSON 解析错误: ${error.message}`;
+          this.showError('JSON 格式无效，请检查语法');
+          this.hideStats();
+        }
+      }
+
+      compressJson() {
+        const inputJson = document.getElementById("inputJson").value;
+        const outputJson = document.getElementById("outputJson");
+
+        if (!inputJson.trim()) {
+          this.showError('请输入 JSON 数据');
+          return;
+        }
+
+        try {
+          const parsedJson = JSON.parse(inputJson);
+          const compressedJson = JSON.stringify(parsedJson);
+          outputJson.value = compressedJson;
+          this.updateStats(compressedJson);
+          this.showSuccess('JSON 压缩成功');
+        } catch (error) {
+          outputJson.value = `JSON 解析错误: ${error.message}`;
+          this.showError('JSON 格式无效，请检查语法');
+          this.hideStats();
+        }
+      }
+
+      validateJson() {
+        const inputJson = document.getElementById("inputJson").value;
+        const outputJson = document.getElementById("outputJson");
+
+        if (!inputJson.trim()) {
+          this.showError('请输入 JSON 数据');
+          return;
+        }
+
+        try {
+          const parsedJson = JSON.parse(inputJson);
+          outputJson.value = JSON.stringify(parsedJson, null, 2);
+          this.updateStats(outputJson.value);
+          this.showSuccess('JSON 格式验证通过');
+        } catch (error) {
+          outputJson.value = `JSON 验证失败: ${error.message}`;
+          this.showError('JSON 格式无效');
+          this.hideStats();
+        }
+      }
+
+      autoValidate() {
+        const inputJson = document.getElementById("inputJson").value;
+        if (!inputJson.trim()) {
+          this.hideStats();
+          return;
+        }
+
+        try {
+          JSON.parse(inputJson);
+          // 简单验证通过，不显示详细信息
+          document.getElementById('jsonInfo').style.display = 'block';
+          document.getElementById('jsonSize').textContent = inputJson.length;
+          document.getElementById('jsonLines').textContent = inputJson.split('\n').length;
+          document.getElementById('jsonDepth').textContent = '?'; // 需要更复杂的计算
+        } catch (error) {
+          this.hideStats();
+        }
+      }
+
+      updateStats(jsonString) {
+        const lines = jsonString.split('\n').length;
+        const depth = this.calculateDepth(JSON.parse(jsonString));
+
+        document.getElementById('jsonInfo').style.display = 'block';
+        document.getElementById('jsonSize').textContent = jsonString.length;
+        document.getElementById('jsonLines').textContent = lines;
+        document.getElementById('jsonDepth').textContent = depth;
+      }
+
+      hideStats() {
+        document.getElementById('jsonInfo').style.display = 'none';
+      }
+
+      calculateDepth(obj, currentDepth = 0) {
+        if (typeof obj !== 'object' || obj === null) {
+          return currentDepth;
+        }
+
+        let maxDepth = currentDepth;
+        for (const key in obj) {
+          if (obj.hasOwnProperty(key)) {
+            const depth = this.calculateDepth(obj[key], currentDepth + 1);
+            maxDepth = Math.max(maxDepth, depth);
+          }
+        }
+        return maxDepth;
+      }
+    }
+
+    // 全局函数，供按钮调用
+    function formatJson() {
+      window.jsonTool.formatJson();
+    }
+
+    function compressJson() {
+      window.jsonTool.compressJson();
+    }
+
+    function validateJson() {
+      window.jsonTool.validateJson();
+    }
+
+    // 初始化工具
+    document.addEventListener('DOMContentLoaded', function () {
+      window.jsonTool = new JsonTool();
+
+      // 设置焦点到输入框
+      document.getElementById('inputJson').focus();
+
+      // 添加键盘快捷键
+      document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          formatJson();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
+          e.preventDefault();
+          compressJson();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+          e.preventDefault();
+          validateJson();
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
